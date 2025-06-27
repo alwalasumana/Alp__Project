@@ -1,0 +1,289 @@
+/* StudentDashboard Component Styles */
+.student-dashboard-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 50%, #fbc2eb 100%);
+  padding-bottom: 2rem;
+}
+
+.student-dashboard-header {
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.10);
+  border-bottom: 1.5px solid #ede9fe;
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
+}
+
+.student-dashboard-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.student-dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.student-dashboard-header-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-dashboard-header-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #23234d;
+  margin-bottom: 0.1em;
+  letter-spacing: 0.01em;
+}
+
+.student-dashboard-header-welcome {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.student-dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.student-dashboard-level {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  background: #fef9c3;
+  color: #b45309;
+  padding: 0.3em 1em;
+  border-radius: 999px;
+  font-size: 0.98em;
+  font-weight: 600;
+}
+
+.student-dashboard-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #a78bfa;
+  object-fit: cover;
+}
+
+.student-dashboard-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  color: #6b7280;
+  background: none;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: color 0.18s;
+}
+
+.student-dashboard-logout:hover {
+  color: #dc2626;
+}
+
+.student-dashboard-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.student-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.student-dashboard-stat-card {
+  background: rgba(255,255,255,0.92);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.10);
+  border-left: 5px solid #a78bfa;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: box-shadow 0.18s;
+}
+
+.student-dashboard-stat-card .icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ede9fe;
+}
+
+.student-dashboard-stat-card.points { border-left-color: #a78bfa; }
+.student-dashboard-stat-card.streak { border-left-color: #34d399; }
+.student-dashboard-stat-card.games { border-left-color: #60a5fa; }
+.student-dashboard-stat-card.score { border-left-color: #fbbf24; }
+
+.student-dashboard-stat-label {
+  color: #6b7280;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.student-dashboard-stat-value {
+  color: #23234d;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.student-dashboard-section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #23234d;
+  margin-bottom: 1.2rem;
+}
+
+.student-dashboard-assigned-games {
+  margin-bottom: 2.5rem;
+}
+
+.student-dashboard-assigned-games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.student-dashboard-no-games {
+  background: rgba(255,255,255,0.92);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.10);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.student-dashboard-recent-activity {
+  background: rgba(255,255,255,0.92);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80, 80, 180, 0.10);
+  margin-bottom: 2rem;
+}
+
+.student-dashboard-recent-activity-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1.5px solid #e5e7eb;
+}
+
+.student-dashboard-recent-activity-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #23234d;
+}
+
+.student-dashboard-recent-activity-list {
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.student-dashboard-recent-session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f3f4f6;
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  transition: box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(80, 80, 180, 0.04);
+}
+
+.student-dashboard-recent-session .icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #a78bfa;
+  color: #fff;
+}
+
+.student-dashboard-recent-session-info {
+  margin-left: 1rem;
+}
+
+.student-dashboard-recent-session-title {
+  font-weight: 600;
+  color: #23234d;
+}
+
+.student-dashboard-recent-session-date {
+  color: #6b7280;
+  font-size: 0.95em;
+}
+
+.student-dashboard-recent-session-score {
+  font-weight: 700;
+  color: #23234d;
+  font-size: 1.1em;
+}
+
+.student-dashboard-recent-session-time {
+  color: #6b7280;
+  font-size: 0.95em;
+}
+
+.student-dashboard-recent-session-emotion {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-left: 0.7em;
+  display: inline-block;
+}
+
+.student-dashboard-recent-session-emotion.happy { background: #34d399; }
+.student-dashboard-recent-session-emotion.excited { background: #fbbf24; }
+.student-dashboard-recent-session-emotion.frustrated { background: #f87171; }
+.student-dashboard-recent-session-emotion.neutral { background: #a1a1aa; }
+
+@media (max-width: 900px) {
+  .student-dashboard-header-inner,
+  .student-dashboard-main {
+    max-width: 100vw;
+    padding: 0 0.5rem;
+  }
+  .student-dashboard-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .student-dashboard-assigned-games-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .student-dashboard-header-inner,
+  .student-dashboard-main {
+    padding: 0 0.2rem;
+  }
+  .student-dashboard-header-title {
+    font-size: 1.1rem;
+  }
+  .student-dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .student-dashboard-assigned-games-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

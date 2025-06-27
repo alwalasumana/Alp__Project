@@ -1,0 +1,226 @@
+/* Memory Match Game Styles */
+.memory-game-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+.memory-game-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 36px;
+  padding: 48px 40px 40px 40px;
+  box-shadow: 0 16px 48px rgba(247, 151, 30, 0.13);
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  animation: slideIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+  margin-bottom: 32px;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.memory-game-card h2 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #f7971e, #ffd200);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 70px);
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.memory-card {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #f7971e 60%, #ffd200 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(247, 151, 30, 0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  user-select: none;
+  position: relative;
+  border: 2.5px solid #fffbe7;
+  perspective: 600px;
+}
+.memory-card.flipped, .memory-card.matched {
+  background: linear-gradient(135deg, #43e97b 60%, #38f9d7 100%);
+  color: #fff;
+  transform: scale(1.08) rotateY(180deg);
+  box-shadow: 0 8px 32px rgba(67, 233, 123, 0.13);
+  border-color: #43e97b;
+}
+.memory-card.matched {
+  background: linear-gradient(135deg, #a18cd1 60%, #fbc2eb 100%);
+  color: #fff;
+  border-color: #a18cd1;
+  opacity: 0.7;
+}
+.memory-card:active {
+  transform: scale(0.97);
+}
+
+.memory-feedback {
+  margin: 18px 0 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ff6b6b;
+  background: #fffbe7;
+  border-radius: 12px;
+  padding: 10px 18px;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.07);
+  display: inline-block;
+  animation: feedbackSlide 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+}
+@keyframes feedbackSlide {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.memory-moves {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #7b6fc2;
+  margin-bottom: 18px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 8px 18px;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(161, 140, 209, 0.07);
+}
+
+.memory-end-buttons {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.memory-restart-button {
+  background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(161, 140, 209, 0.13);
+}
+.memory-restart-button:hover {
+  background: linear-gradient(90deg, #fbc2eb, #a18cd1);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(161, 140, 209, 0.18);
+}
+.memory-submit-button {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 22px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(67, 233, 123, 0.13);
+}
+.memory-submit-button:hover {
+  background: linear-gradient(90deg, #38f9d7, #43e97b);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(67, 233, 123, 0.18);
+}
+.memory-end-message {
+  color: #43e97b;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-top: 24px;
+  padding: 18px;
+  background: rgba(67, 233, 123, 0.10);
+  border-radius: 18px;
+  border: 2px solid #43e97b;
+  box-shadow: 0 2px 8px rgba(67, 233, 123, 0.07);
+}
+
+.memory-back-button {
+  background: linear-gradient(90deg, #ff6b6b, #fbc2eb);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.15);
+  margin-top: 24px;
+  letter-spacing: 1px;
+}
+.memory-back-button:hover {
+  background: linear-gradient(90deg, #fbc2eb, #ff6b6b);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.25);
+}
+
+@media (max-width: 768px) {
+  .memory-game-card {
+    padding: 24px 10px;
+    margin: 10px;
+  }
+  .memory-game-card h2 {
+    font-size: 2rem;
+  }
+  .memory-grid {
+    grid-template-columns: repeat(4, 50px);
+    gap: 10px;
+  }
+  .memory-card {
+    width: 50px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
+  .memory-end-buttons button {
+    width: 100%;
+    max-width: 220px;
+  }
+}
+
+.memory-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+} 

@@ -1,0 +1,35 @@
+# Node.js
+middleware/node_modules/
+project/node_modules/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+.venv/
+venv/
+ENV/
+.Python
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Editor and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Environment files
+.env
+.env.*
+
+# Dataset
+model/Dataset/
+model/Data/landmarks.csv

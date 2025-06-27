@@ -1,0 +1,381 @@
+/* GameAssignment Component Styles */
+.game-assignment-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0e7ff 0%, #fbc2eb 50%, #c7d2fe 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0 0 0;
+}
+
+.game-assignment-dashboard-btn {
+  background: linear-gradient(90deg, #a78bfa 0%, #f472b6 100%);
+  color: #fff;
+  padding: 0.9rem 2.5rem;
+  border: none;
+  border-radius: 1.2rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 12px 0 rgba(168,85,247,0.10);
+  transition: background 0.2s, transform 0.18s;
+  cursor: pointer;
+  margin-bottom: 2rem;
+}
+.game-assignment-dashboard-btn:hover {
+  background: linear-gradient(90deg, #7c3aed 0%, #db2777 100%);
+  transform: scale(1.035);
+}
+
+.game-assignment-container {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 1.5rem 3.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-assignment-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.game-assignment-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #3b0764;
+}
+
+.game-assignment-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%);
+  color: #fff;
+  padding: 0.7rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: none;
+  box-shadow: 0 2px 12px 0 rgba(168,85,247,0.10);
+  transition: background 0.2s, transform 0.18s;
+  cursor: pointer;
+}
+.game-assignment-add-btn:hover {
+  background: linear-gradient(90deg, #7c3aed 0%, #2563eb 100%);
+  transform: scale(1.04);
+}
+.game-assignment-add-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.game-assignment-form-bg {
+  background: linear-gradient(135deg, #ede9fe 0%, #fbc2eb 100%);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(168, 85, 247, 0.10), 0 1.5px 8px 0 rgba(236,72,153,0.07);
+  border: 1.5px solid #a78bfa;
+  padding: 2rem 2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 600px;
+}
+.game-assignment-form-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 1.2rem;
+}
+.game-assignment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.game-assignment-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+@media (max-width: 700px) {
+  .game-assignment-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+.game-assignment-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3b0764;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+.game-assignment-select {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #a78bfa;
+  border-radius: 1rem;
+  font-size: 1rem;
+  color: #3b0764;
+  background: rgba(255,255,255,0.95);
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: 0 1px 4px rgba(168,85,247,0.04);
+}
+.game-assignment-select:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.13);
+}
+.game-assignment-notes {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #a78bfa;
+  border-radius: 1rem;
+  font-size: 1rem;
+  color: #3b0764;
+  background: rgba(255,255,255,0.95);
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+  box-shadow: 0 1px 4px rgba(168,85,247,0.04);
+  resize: none;
+  min-height: 70px;
+}
+.game-assignment-notes:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.13);
+}
+.game-assignment-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.game-assignment-cancel-btn {
+  padding: 0.7rem 1.5rem;
+  border: 1.5px solid #a78bfa;
+  color: #7c3aed;
+  background: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.game-assignment-cancel-btn:hover {
+  background: #ede9fe;
+  color: #3b0764;
+}
+.game-assignment-submit-btn {
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%);
+  color: #fff;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 12px 0 rgba(168,85,247,0.10);
+  transition: background 0.2s, transform 0.18s;
+  cursor: pointer;
+}
+.game-assignment-submit-btn:hover {
+  background: linear-gradient(90deg, #7c3aed 0%, #2563eb 100%);
+  transform: scale(1.04);
+}
+
+.game-assignment-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.game-assignment-card {
+  background: rgba(255,255,255,0.93);
+  border-radius: 1.2rem;
+  box-shadow: 0 6px 24px 0 rgba(168, 85, 247, 0.10), 0 1.5px 8px 0 rgba(236,72,153,0.07);
+  border: 1.5px solid #ede9fe;
+  padding: 1.1rem 1rem 1.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: transform 0.16s, box-shadow 0.16s;
+}
+.game-assignment-card:hover {
+  transform: translateY(-3px) scale(1.025);
+  box-shadow: 0 12px 36px 0 rgba(168, 85, 247, 0.16), 0 2px 12px 0 rgba(236,72,153,0.10);
+}
+.game-assignment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+.game-assignment-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.game-assignment-game-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px 0 rgba(168,85,247,0.10);
+}
+.game-assignment-game-icon-svg {
+  width: 26px;
+  height: 26px;
+  color: #fff;
+}
+.game-assignment-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b0764;
+  margin-bottom: 0.1rem;
+}
+.game-assignment-card-student {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.98rem;
+  color: #7c3aed;
+  font-weight: 500;
+}
+.game-assignment-card-student-icon {
+  width: 16px;
+  height: 16px;
+}
+.game-assignment-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.1rem;
+  border-radius: 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #ede9fe;
+  color: #7c3aed;
+  text-transform: capitalize;
+}
+.game-assignment-status.completed {
+  background: #d1fae5;
+  color: #059669;
+}
+.game-assignment-status.in-progress {
+  background: #fef9c3;
+  color: #b45309;
+}
+.game-assignment-status.assigned {
+  background: #dbeafe;
+  color: #2563eb;
+}
+.game-assignment-status-label {
+  margin-left: 0.2rem;
+}
+.game-assignment-card-info {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 0.7rem;
+  flex-wrap: wrap;
+}
+.game-assignment-card-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.93rem;
+  color: #7c3aed;
+  margin-bottom: 0.1rem;
+}
+.game-assignment-card-info-icon {
+  width: 14px;
+  height: 14px;
+}
+.game-assignment-card-info-label {
+  font-weight: 600;
+  color: #3b0764;
+}
+.game-assignment-card-notes {
+  background: #ede9fe;
+  border-radius: 0.7rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.game-assignment-card-notes-title {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: #a21caf;
+  margin-bottom: 0.2rem;
+}
+.game-assignment-card-notes-content {
+  font-size: 0.93rem;
+  color: #3b0764;
+}
+.game-assignment-card-description {
+  font-size: 0.93rem;
+  color: #7c3aed;
+  margin-top: 0.3rem;
+}
+
+.game-assignment-empty {
+  text-align: center;
+  padding: 3rem 0 2rem 0;
+}
+.game-assignment-empty-icon {
+  width: 64px;
+  height: 64px;
+  color: #a78bfa;
+  margin-bottom: 1rem;
+}
+.game-assignment-empty-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 0.5rem;
+}
+.game-assignment-empty-desc {
+  color: #a21caf;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 700px) {
+  .game-assignment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+  .game-assignment-container {
+    padding: 0 0.3rem 3.5rem 0.3rem;
+  }
+  .game-assignment-card {
+    padding: 0.8rem 0.5rem 1rem 0.5rem;
+  }
+}
+
+.game-assignment-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.game-assignment-loading-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 
