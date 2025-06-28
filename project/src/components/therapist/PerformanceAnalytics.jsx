@@ -87,12 +87,17 @@ const PerformanceAnalytics = () => {
     : 0;
   const totalTimeSpent = Math.round(filteredSessions.reduce((sum, session) => sum + session.timeSpent, 0) / 60);
 
-  // Emotional state distribution
-  const emotionalStates = filteredSessions.reduce((acc, session) => {
-    const state = session.emotionalState || 'neutral';
-    acc[state] = (acc[state] || 0) + 1;
+  // Aggregate all emotions from all sessions
+  const allEmotions = filteredSessions.flatMap(session =>
+    Array.isArray(session.emotions) && session.emotions.length > 0
+      ? session.emotions.map(e => typeof e === 'string' ? e : e.emotion)
+      : [session.emotionalState || 'neutral']
+  );
+  const emotionalStates = allEmotions.reduce((acc, emotion) => {
+    acc[emotion] = (acc[emotion] || 0) + 1;
     return acc;
   }, {});
+  const totalEmotions = allEmotions.length;
 
   // Game performance breakdown
   const gamePerformance = filteredSessions.reduce((acc, session) => {
@@ -141,18 +146,38 @@ const PerformanceAnalytics = () => {
 
   const getEmotionalStateEmoji = (state) => {
     switch (state) {
-      case 'happy':
-        return '😊';
-      case 'excited':
-        return '🤩';
-      case 'frustrated':
-        return '😤';
-      case 'neutral':
-        return '😐';
-      default:
-        return '😐';
+      case 'happy': return '😊';
+      case 'surprised': return '😮';
+      case 'sad': return '😢';
+      case 'angry': return '😠';
+      case 'fear': return '😨';
+      case 'disgust': return '🤢';
+      case 'frustrated': return '😤';
+      case 'neutral': return '😐';
+      default: return '😐';
+      //kiuyhgsdhjikofijhugj
     }
   };
+
+  // Helper to get the most frequent emotion from an array
+  function getMostFrequentEmotion(emotions) {
+    if (!emotions || emotions.length === 0) return 'neutral';
+    const freq = {};
+    emotions.forEach(e => {
+      const emotion = typeof e === 'string' ? e : e.emotion;
+      freq[emotion] = (freq[emotion] || 0) + 1;
+    });
+    return Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+  }
+
+  // Map gameId to emoji for display
+  function getGameEmoji(session) {
+    const id = session.gameId || session.gameType || '';
+    if (id.includes('math')) return '🧮';
+    if (id.includes('memory')) return '🧠';
+    if (id.includes('pattern')) return '🧩';
+    return '🎮';
+  }
 
   if (loading) {
     return (
@@ -245,7 +270,7 @@ const PerformanceAnalytics = () => {
                   <div className="performance-analytics-emotion-emoji">{getEmotionalStateEmoji(state)}</div>
                   <div className="performance-analytics-emotion-label">{state}</div>
                   <div className="performance-analytics-emotion-percent">
-                    {Math.round((count / totalSessions) * 100)}% of sessions
+                    {Math.round((count / totalEmotions) * 100)}% of emotions
                   </div>
                   <div className="performance-analytics-emotion-count">{count}</div>
                 </div>
@@ -305,7 +330,7 @@ const PerformanceAnalytics = () => {
                     <div key={session.id} className="performance-analytics-recent-card">
                       <div className="performance-analytics-recent-info">
                         <div className="performance-analytics-recent-game">
-                          {game?.name?.charAt(0) || 'G'}
+                          {getGameEmoji(session)}
                         </div>
                         <div className="performance-analytics-recent-details">
                           <div className="performance-analytics-recent-student">{student?.name}</div>
@@ -322,8 +347,15 @@ const PerformanceAnalytics = () => {
                           <div className="performance-analytics-recent-stat-label">Time</div>
                         </div>
                         <div className="performance-analytics-recent-stat">
-                          <div className="performance-analytics-recent-emoji">{getEmotionalStateEmoji(session.emotionalState || 'neutral')}</div>
-                          <div className="performance-analytics-recent-stat-label">{session.emotionalState || 'neutral'}</div>
+                          {(() => {
+                            const mostFrequentEmotion = getMostFrequentEmotion(session.emotions) || session.emotionalState || 'neutral';
+                            return (
+                              <div className="performance-analytics-recent-stat">
+                                <div className="performance-analytics-recent-emoji">{getEmotionalStateEmoji(mostFrequentEmotion)}</div>
+                                <div className="performance-analytics-recent-stat-label">{mostFrequentEmotion}</div>
+                              </div>
+                            );
+                          })()}
                         </div>
                         <div className="performance-analytics-recent-date">
                           <div>{new Date(session.completedAt).toLocaleDateString()}</div>

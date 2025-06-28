@@ -22,6 +22,17 @@ function getMostFrequentEmotion(emotions) {
   return Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
 }
 
+function getLevelFromLastThreeEmotions(emotions) {
+  if (emotions.length === 0) return 'medium';
+  const lastThree = emotions.slice(-3);
+  const freq = {};
+  lastThree.forEach(e => { freq[e] = (freq[e] || 0) + 1; });
+  const mostFrequent = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+  if (mostFrequent === 'happy' || mostFrequent === 'surprised') return 'hard';
+  if (['sad', 'fear', 'disgust', 'angry'].includes(mostFrequent)) return 'easy';
+  return 'medium';
+}
+
 const MathChallengeGame = () => {
   const { user, savePerformance } = useAuth();
   const { addGameSession } = useGame();
@@ -114,7 +125,9 @@ const MathChallengeGame = () => {
 
   const handleNext = () => {
     if (questionNumber < TOTAL_QUESTIONS) {
-      const level = getLevelFromEmotions(emotionHistory.current);
+      const lastThree = emotionHistory.current.slice(-3);
+      console.log('Last 3 emotions for next question difficulty:', lastThree);
+      const level = getLevelFromLastThreeEmotions(emotionHistory.current);
       const pool = questions[level] || [];
       let nextUsedIndices = usedIndices;
       let nextCurrentPool = currentPool;
@@ -174,7 +187,7 @@ const MathChallengeGame = () => {
         maxScore: TOTAL_QUESTIONS,
         accuracy: score / TOTAL_QUESTIONS,
         timeSpent,
-        difficulty: getLevelFromEmotions(emotionHistory.current),
+        difficulty: getLevelFromLastThreeEmotions(emotionHistory.current),
         emotions: emotionHistory.current.map(e => ({
           emotion: typeof e === 'string' ? e : e.emotion,
           confidence: 0.9,
@@ -182,6 +195,21 @@ const MathChallengeGame = () => {
         })),
         emotionalState: mostFrequentEmotion
       });
+
+      // After saving performance, update learning path progress
+      try {
+        await fetch('/api/game/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentId: user.id,
+            gameId: 'math-challenge',
+            score: score
+          })
+        });
+      } catch (err) {
+        console.error('Failed to update learning path progress:', err);
+      }
 
       setSubmitted(true);
       setSaving(false);

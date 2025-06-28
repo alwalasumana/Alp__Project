@@ -88,18 +88,34 @@ const EmotionWebcam = ({ onEmotionChange }) => {
     navigate('/dashboard/student');
   };
 
+  // Helper to get emoji for emotion
+  const getEmotionEmoji = (emotion) => {
+    switch (emotion) {
+      case 'happy': return '😊';
+      case 'surprised': return '😮';
+      case 'sad': return '😢';
+      case 'angry': return '😠';
+      case 'fear': return '😨';
+      case 'disgust': return '🤢';
+      case 'frustrated': return '😤';
+      case 'neutral': return '😐';
+      default: return '😐';
+    }
+  };
+
   return (
     <div className="emotion-webcam-container">
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        screenshotFormat="image/jpeg"
-        width={120}
-        height={90}
-        style={{ borderRadius: 8, marginBottom: 8 }}
-      />
-      <div className="emotion-text">
-        {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
+      <div className="emotion-display">
+        <Webcam
+          ref={webcamRef}
+          audio={false}
+          screenshotFormat="image/jpeg"
+          className="emotion-webcam-video"
+        />
+        <div className="emotion-text">
+          {getEmotionEmoji(emotion)}{' '}
+          {emotion.charAt(0).toUpperCase() + emotion.slice(1)}
+        </div>
       </div>
     </div>
   );

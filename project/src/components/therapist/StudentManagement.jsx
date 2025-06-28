@@ -12,6 +12,8 @@ const StudentManagement = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showPathBuilder, setShowPathBuilder] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -101,7 +103,9 @@ const StudentManagement = () => {
         {students.length > 0 ? (
           <div className="student-management-grid">
             {students.map((student) => (
-              <StudentCard key={student._id} student={student} navigate={navigate} />
+              <StudentCard key={student._id} student={student} navigate={navigate}
+                onEditPath={() => { setSelectedStudent(student); setShowPathBuilder(true); }}
+              />
             ))}
           </div>
         ) : (
@@ -124,14 +128,15 @@ const StudentManagement = () => {
   );
 };
 
-const StudentCard = ({ student, navigate }) => {
+const StudentCard = ({ student, navigate, onEditPath }) => {
   const [progress, setProgress] = useState({
     totalSessions: 0,
     averageScore: 0,
-    completedAssignments: 0,
     activeAssignments: 0
   });
   const [loading, setLoading] = useState(true);
+  const { getPerformance } = useAuth();
+  const { getStudentAssignments } = useGame();
 
   useEffect(() => {
     fetchStudentProgress();
@@ -139,22 +144,31 @@ const StudentCard = ({ student, navigate }) => {
 
   const fetchStudentProgress = async () => {
     try {
-      const { getPerformance } = useAuth();
-      const result = await getPerformance(student._id);
-      if (result.success) {
-        const performances = result.performances;
-        const totalSessions = performances.length;
-        const averageScore = totalSessions > 0 
-          ? Math.round(performances.reduce((sum, perf) => sum + perf.score, 0) / totalSessions)
-          : 0;
-        
-        setProgress({
-          totalSessions,
-          averageScore,
-          completedAssignments: 0,
-          activeAssignments: 0
-        });
+      // Fetch performance
+      const perfResult = await getPerformance(student._id);
+      let totalSessions = 0;
+      let averageScore = 0;
+      if (perfResult.success && perfResult.performances.length > 0) {
+        totalSessions = perfResult.performances.length;
+        averageScore = Math.round(
+          perfResult.performances.reduce((sum, perf) => sum + perf.score, 0) / totalSessions
+        );
       }
+
+      // Fetch assignments
+      let activeAssignments = 0;
+      if (getStudentAssignments) {
+        const assignments = getStudentAssignments(student._id);
+        if (Array.isArray(assignments)) {
+          activeAssignments = assignments.filter(a => a.status === 'active' || a.status === 'assigned').length;
+        }
+      }
+
+      setProgress({
+        totalSessions,
+        averageScore,
+        activeAssignments
+      });
     } catch (err) {
       console.error('Error fetching student progress:', err);
     } finally {
@@ -172,10 +186,6 @@ const StudentCard = ({ student, navigate }) => {
         />
         <div>
           <h3 className="student-card-name">{student.name}</h3>
-          <div className="student-card-level">
-            <User className="student-card-level-icon" />
-            <span>Level {student.level}</span>
-          </div>
         </div>
       </div>
       <div className="student-card-stats">
@@ -198,10 +208,6 @@ const StudentCard = ({ student, navigate }) => {
         <div className="student-card-progress-row">
           <span>Active Assignments</span>
           <span className="student-card-progress-active">{loading ? '...' : progress.activeAssignments}</span>
-        </div>
-        <div className="student-card-progress-row">
-          <span>Current Streak</span>
-          <span className="student-card-progress-streak">{student.currentStreak} days</span>
         </div>
       </div>
       <div className="student-card-contact">

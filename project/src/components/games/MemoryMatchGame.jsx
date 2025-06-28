@@ -30,6 +30,10 @@ const MemoryMatchGame = () => {
   const [saving, setSaving] = useState(false);
   const [score, setScore] = useState(0);
   const [startTime, setStartTime] = useState(null);
+  const NEGATIVE_EMOTIONS = ['sad', 'angry', 'frustrated', 'fear', 'disgust'];
+  const NEGATIVE_THRESHOLD = 3;
+  const [temporarilyFlippedPair, setTemporarilyFlippedPair] = useState([]);
+  const [emotionHistoryLength, setEmotionHistoryLength] = useState(0);
 
   // Load questions/cards from JSON
   useEffect(() => {
@@ -71,6 +75,8 @@ const MemoryMatchGame = () => {
   const handleEmotionChange = (newEmotion) => {
     setEmotion(newEmotion);
     emotionHistory.current.push(newEmotion);
+    setEmotionHistoryLength(emotionHistory.current.length);
+    console.log('Emotion history:', emotionHistory.current);
   };
 
   function getLevelFromEmotions(emotions) {
@@ -171,10 +177,19 @@ const MemoryMatchGame = () => {
         emotionalState: mostFrequentEmotion
       });
 
+      await fetch('/api/game/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: user.id,
+          gameId: 'memory-match',
+          score: score
+        })
+      });
+
       setSubmitted(true);
       setSaving(false);
       
-      // Navigate back to dashboard after a short delay
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
@@ -186,6 +201,31 @@ const MemoryMatchGame = () => {
     }
   };
 
+  // Real-time difficulty adjustment: temporarily flip an unmatched pair if last 3 emotions are negative
+  useEffect(() => {
+    console.log('Checking for negative emotions');
+    if (emotionHistory.current.length >= NEGATIVE_THRESHOLD) {
+      const lastN = emotionHistory.current.slice(-NEGATIVE_THRESHOLD);
+      console.log('Last N emotions:', lastN);
+      if (lastN.every(e => NEGATIVE_EMOTIONS.includes(e))) {
+        // Find an unmatched, unflipped pair
+        const unmatched = cards.filter(card => !card.isMatched && !card.isFlipped);
+        if (unmatched.length >= 2) {
+          for (let i = 0; i < unmatched.length; i++) {
+            for (let j = i + 1; j < unmatched.length; j++) {
+              if (unmatched[i].value === unmatched[j].value) {
+                setTemporarilyFlippedPair([unmatched[i].id, unmatched[j].id]);
+                setTimeout(() => setTemporarilyFlippedPair([]), 2000);
+                console.log('Flipping pair:', unmatched[i].id, unmatched[j].id);
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  }, [emotionHistoryLength, cards]);
+
   if (cards.length === 0) return <div>Loading cards...</div>;
 
   return (
@@ -193,31 +233,36 @@ const MemoryMatchGame = () => {
       <div className="memory-game-card">
         <h2 style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, marginBottom: 16 }}>Memory Match Game</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 60px)', gridTemplateRows: 'repeat(2, 60px)', gap: 16, justifyContent: 'center', marginBottom: 24 }}>
-          {cards.map((card, idx) => (
-            <div
-              key={card.id}
-              onClick={() => handleCardClick(idx)}
-              style={{
-                width: 60,
-                height: 60,
-                background: card.isMatched ? '#a7f3d0' : card.isFlipped ? '#fff' : '#6366f1',
-                color: card.isMatched ? '#fff' : card.isFlipped ? '#6366f1' : '#fff',
-                borderRadius: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 32,
-                fontWeight: 700,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                cursor: card.isFlipped || card.isMatched || gameOver ? 'default' : 'pointer',
-                border: card.isFlipped ? '2px solid #6366f1' : '2px solid #e0e7ff',
-                transition: 'all 0.3s',
-                userSelect: 'none',
-              }}
-            >
-              {card.isFlipped || card.isMatched ? card.value : '❓'}
-            </div>
-          ))}
+          {cards.map((card, idx) => {
+            const isTempFlipped = temporarilyFlippedPair.includes(card.id);
+            return (
+              <div
+                key={card.id}
+                onClick={() => handleCardClick(idx)}
+                style={{
+                  width: 60,
+                  height: 60,
+                  background: card.isMatched ? '#a7f3d0' : (card.isFlipped || isTempFlipped) ? '#fff' : '#6366f1',
+                  color: card.isMatched ? '#fff' : (card.isFlipped || isTempFlipped) ? '#6366f1' : '#fff',
+                  borderRadius: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 32,
+                  fontWeight: 700,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  cursor: card.isFlipped || card.isMatched || gameOver ? 'default' : 'pointer',
+                  border: (card.isFlipped || isTempFlipped) ? '2px solid #6366f1' : '2px solid #e0e7ff',
+                  transition: 'all 0.3s',
+                  userSelect: 'none',
+                  outline: isTempFlipped ? '3px solid #fbbf24' : undefined,
+                  outlineOffset: isTempFlipped ? '2px' : undefined,
+                }}
+              >
+                {(card.isFlipped || card.isMatched || isTempFlipped) ? card.value : '❓'}
+              </div>
+            );
+          })}
         </div>
         <div style={{ textAlign: 'center', marginBottom: 16, fontWeight: 500 }}>
           Moves: {moves}

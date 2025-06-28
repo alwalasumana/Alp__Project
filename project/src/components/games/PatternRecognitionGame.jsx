@@ -77,13 +77,12 @@ const PatternRecognitionGame = () => {
     emotionHistory.current.push(newEmotion);
   };
 
-  function getLevelFromEmotions(emotions) {
+  function getLevelFromLastThreeEmotions(emotions) {
     if (emotions.length === 0) return 'medium';
-    
+    const lastThree = emotions.slice(-3);
     const freq = {};
-    emotions.forEach(e => { freq[e] = (freq[e] || 0) + 1; });
+    lastThree.forEach(e => { freq[e] = (freq[e] || 0) + 1; });
     const mostFrequent = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
-    
     if (mostFrequent === 'happy' || mostFrequent === 'surprised') return 'hard';
     if (['sad', 'fear', 'disgust', 'angry'].includes(mostFrequent)) return 'easy';
     return 'medium';
@@ -105,7 +104,9 @@ const PatternRecognitionGame = () => {
 
   const handleNext = () => {
     if (questionNumber < TOTAL_QUESTIONS) {
-      const level = getLevelFromEmotions(emotionHistory.current);
+      const lastThree = emotionHistory.current.slice(-3);
+      console.log('Last 3 emotions for next question difficulty:', lastThree);
+      const level = getLevelFromLastThreeEmotions(emotionHistory.current);
       const pool = questions[level] || questions.medium || [];
       
       // Check if we need to switch pools
@@ -190,7 +191,7 @@ const PatternRecognitionGame = () => {
         maxScore: TOTAL_QUESTIONS,
         accuracy: score / TOTAL_QUESTIONS,
         timeSpent,
-        difficulty: getLevelFromEmotions(emotionHistory.current),
+        difficulty: getLevelFromLastThreeEmotions(emotionHistory.current),
         emotions: emotionHistory.current.map(e => ({ 
           emotion: e, 
           confidence: 0.9, 
@@ -199,10 +200,19 @@ const PatternRecognitionGame = () => {
         emotionalState: mostFrequentEmotion
       });
 
+      await fetch('/api/game/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: user.id,
+          gameId: 'pattern-recognition',
+          score: score
+        })
+      });
+
       setSubmitted(true);
       setSaving(false);
       
-      // Navigate back to dashboard after a short delay
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
