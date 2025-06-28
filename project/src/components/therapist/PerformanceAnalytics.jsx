@@ -155,7 +155,6 @@ const PerformanceAnalytics = () => {
       case 'frustrated': return '😤';
       case 'neutral': return '😐';
       default: return '😐';
-      //kiuyhgsdhjikofijhugj
     }
   };
 
