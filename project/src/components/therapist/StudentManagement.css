@@ -339,4 +339,67 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .student-management-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .student-management-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+  }
+  .student-management-title {
+    font-size: 1.2rem;
+  }
+  .student-management-list {
+    gap: 0.7rem;
+  }
+  .student-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1rem;
+  }
+  .student-card-info {
+    gap: 0.5rem;
+  }
+  .student-management-empty {
+    padding: 1.5rem 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .student-management-container {
+    padding: 0.3rem !important;
+  }
+  .student-management-title {
+    font-size: 1rem !important;
+  }
+  .student-management-header {
+    padding: 0.5rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .student-management-title {
+    font-size: 0.9rem !important;
+  }
+  .student-card {
+    padding: 0.5rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .student-management-title {
+    font-size: 0.8rem !important;
+  }
+  .student-card {
+    padding: 0.3rem !important;
+  }
 } 

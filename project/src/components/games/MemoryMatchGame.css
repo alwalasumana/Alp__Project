@@ -223,4 +223,58 @@
   color: #fff;
   font-weight: 700;
   letter-spacing: 1px;
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .memory-match-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .memory-match-title {
+    font-size: 1.2rem;
+  }
+  .memory-match-board {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .memory-match-card {
+    width: 60px;
+    height: 60px;
+  }
+  .memory-match-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.95em;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .memory-match-title {
+    font-size: 1rem !important;
+  }
+  .memory-match-board {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.3rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .memory-match-title {
+    font-size: 0.9rem !important;
+  }
+  .memory-match-card {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+@media (max-width: 360px) {
+  .memory-match-title {
+    font-size: 0.8rem !important;
+  }
+  .memory-match-card {
+    width: 30px !important;
+    height: 30px !important;
+  }
 } 

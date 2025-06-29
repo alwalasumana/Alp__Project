@@ -444,4 +444,66 @@
     padding: 10px 14px;
     font-size: 1rem;
   }
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .pattern-recognition-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .pattern-recognition-title {
+    font-size: 1.2rem;
+  }
+  .pattern-recognition-board {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .pattern-recognition-question {
+    font-size: 1.1rem;
+    padding: 0.7rem;
+  }
+  .pattern-recognition-options {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pattern-recognition-option {
+    font-size: 1em;
+    padding: 0.7rem 0.8rem;
+  }
+  .pattern-recognition-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.95em;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .pattern-recognition-title {
+    font-size: 1rem !important;
+  }
+  .pattern-recognition-board {
+    grid-template-columns: 1fr !important;
+    gap: 0.3rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .pattern-recognition-title {
+    font-size: 0.9rem !important;
+  }
+  .pattern-recognition-question {
+    font-size: 0.9rem !important;
+    padding: 0.3rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .pattern-recognition-title {
+    font-size: 0.8rem !important;
+  }
+  .pattern-recognition-question {
+    font-size: 0.8rem !important;
+    padding: 0.2rem !important;
+  }
 } 

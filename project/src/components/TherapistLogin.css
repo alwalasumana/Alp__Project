@@ -240,4 +240,63 @@
 .therapist-login-link-small:hover {
   color: #3b82f6;
   background-color: #eff6ff;
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .therapist-login-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .therapist-login-form {
+    padding: 1rem;
+    gap: 0.7rem;
+  }
+  .therapist-login-title {
+    font-size: 1.2rem;
+  }
+  .therapist-login-input,
+  .therapist-login-button {
+    font-size: 1em;
+    padding: 0.7rem 0.8rem;
+  }
+  .therapist-login-footer {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.95em;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .therapist-login-container {
+    padding: 0.3rem !important;
+  }
+  .therapist-login-title {
+    font-size: 1rem !important;
+  }
+  .therapist-login-form {
+    padding: 0.5rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .therapist-login-title {
+    font-size: 0.9rem !important;
+  }
+  .therapist-login-input,
+  .therapist-login-button {
+    font-size: 0.9em !important;
+    padding: 0.5rem 0.6rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .therapist-login-title {
+    font-size: 0.8rem !important;
+  }
+  .therapist-login-input,
+  .therapist-login-button {
+    font-size: 0.8em !important;
+    padding: 0.3rem 0.4rem !important;
+  }
 } 

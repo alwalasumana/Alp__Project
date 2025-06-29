@@ -336,4 +336,57 @@
   font-size: 1.2rem;
   color: white;
   font-weight: 600;
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .math-game-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .game-title {
+    font-size: 1.2rem;
+  }
+  .question-text {
+    font-size: 1.1rem;
+    padding: 0.7rem;
+  }
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  .action-buttons button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .math-challenge-title {
+    font-size: 1rem !important;
+  }
+  .math-challenge-board {
+    grid-template-columns: 1fr !important;
+    gap: 0.3rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .math-challenge-title {
+    font-size: 0.9rem !important;
+  }
+  .math-challenge-question {
+    font-size: 0.9rem !important;
+    padding: 0.3rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .math-challenge-title {
+    font-size: 0.8rem !important;
+  }
+  .math-challenge-question {
+    font-size: 0.8rem !important;
+    padding: 0.2rem !important;
+  }
 } 

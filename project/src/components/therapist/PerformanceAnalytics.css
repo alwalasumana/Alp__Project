@@ -289,3 +289,133 @@
   background: linear-gradient(90deg, #7c3aed 0%, #db2777 100%);
   transform: scale(1.035);
 }
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .performance-analytics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+  }
+  .performance-analytics-title {
+    font-size: 1.2rem;
+  }
+  .performance-analytics-section-title {
+    font-size: 1.1rem;
+    gap: 0.4rem;
+  }
+  .performance-analytics-stats {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  .performance-analytics-section {
+    padding: 1rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .performance-analytics-emotion-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .performance-analytics-game-list {
+    gap: 0.7rem;
+  }
+  .performance-analytics-game-card {
+    padding: 1rem;
+  }
+  .performance-analytics-game-title {
+    font-size: 1rem;
+  }
+  .performance-analytics-game-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .performance-analytics-recent-list {
+    gap: 0.7rem;
+  }
+  .performance-analytics-recent-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1rem;
+  }
+  .performance-analytics-recent-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .performance-analytics-recent-info {
+    gap: 0.5rem;
+  }
+  .performance-analytics-recent-game {
+    font-size: 1.2rem;
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+  .performance-analytics-recent-details {
+    gap: 0.1rem;
+  }
+  .performance-analytics-empty {
+    padding: 1.5rem 0.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .performance-analytics-header,
+  .performance-analytics-section {
+    padding: 0.5rem !important;
+  }
+  .performance-analytics-title {
+    font-size: 1rem !important;
+  }
+  .performance-analytics-section-title {
+    font-size: 0.95rem !important;
+  }
+  .performance-analytics-stat-card {
+    padding: 0.7rem !important;
+  }
+  .performance-analytics-game-card,
+  .performance-analytics-recent-card {
+    padding: 0.7rem !important;
+  }
+  .performance-analytics-emotion-card {
+    padding: 0.7rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .performance-analytics-title {
+    font-size: 0.9rem !important;
+  }
+  .performance-analytics-section-title {
+    font-size: 0.85rem !important;
+  }
+  .performance-analytics-stat-value {
+    font-size: 1.2rem !important;
+  }
+  .performance-analytics-stat-label {
+    font-size: 0.8rem !important;
+  }
+  .performance-analytics-game-title {
+    font-size: 0.85rem !important;
+  }
+  .performance-analytics-recent-game {
+    font-size: 1rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .performance-analytics-title,
+  .performance-analytics-section-title {
+    font-size: 0.8rem !important;
+  }
+  .performance-analytics-stat-value {
+    font-size: 1rem !important;
+  }
+  .performance-analytics-stat-label {
+    font-size: 0.7rem !important;
+  }
+}

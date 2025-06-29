@@ -93,6 +93,53 @@
   color: #dc2626;
 }
 
+.student-dashboard-performance-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.student-dashboard-performance-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.student-dashboard-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  background: rgba(255, 255, 255, 0.9);
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.student-dashboard-refresh:hover {
+  background: white;
+  color: #374151;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.student-dashboard-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .student-dashboard-main {
   max-width: 1200px;
   margin: 0 auto;
@@ -132,6 +179,17 @@
 .student-dashboard-stat-card.streak { border-left-color: #34d399; }
 .student-dashboard-stat-card.games { border-left-color: #60a5fa; }
 .student-dashboard-stat-card.score { border-left-color: #fbbf24; }
+.student-dashboard-stat-card.performance { 
+  border-left-color: #667eea; 
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.student-dashboard-stat-card.performance:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+  background: rgba(255,255,255,0.98);
+}
 
 .student-dashboard-stat-label {
   color: #6b7280;
@@ -285,5 +343,135 @@
   .student-dashboard-assigned-games-list {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+}
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 480px) {
+  .student-dashboard-header-inner,
+  .student-dashboard-main {
+    padding: 0 0.1rem;
+  }
+  .student-dashboard-header-title {
+    font-size: 1rem;
+  }
+  .student-dashboard-header {
+    padding: 0.7rem 0;
+  }
+  .student-dashboard-header-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .student-dashboard-header-left {
+    gap: 0.4rem;
+  }
+  .student-dashboard-header-right {
+    gap: 0.4rem;
+  }
+  .student-dashboard-performance-btn,
+  .student-dashboard-refresh,
+  .student-dashboard-logout {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85em;
+  }
+  .student-dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .student-dashboard-stat-card {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .student-dashboard-stat-card .icon {
+    width: 32px;
+    height: 32px;
+  }
+  .student-dashboard-section-title {
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+  }
+  .student-dashboard-assigned-games-list {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+  .student-dashboard-no-games {
+    padding: 1.2rem 0.5rem;
+    font-size: 0.95em;
+  }
+  .student-dashboard-recent-activity-list {
+    gap: 0.7rem;
+    padding: 0.7rem 0.5rem;
+  }
+  .student-dashboard-recent-session {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.7rem;
+  }
+  .student-dashboard-recent-session .icon {
+    width: 28px;
+    height: 28px;
+  }
+  .student-dashboard-recent-session-info {
+    margin-left: 0.3rem;
+  }
+  .student-dashboard-recent-session-title {
+    font-size: 1em;
+  }
+  .student-dashboard-recent-session-date {
+    font-size: 0.9em;
+  }
+  .student-dashboard-recent-session-score,
+  .student-dashboard-recent-session-time {
+    font-size: 0.95em;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .student-dashboard-header,
+  .student-dashboard-main,
+  .student-dashboard-section-title {
+    padding: 0.5rem !important;
+  }
+  .student-dashboard-header-title {
+    font-size: 0.95rem !important;
+  }
+  .student-dashboard-stat-card {
+    padding: 0.7rem !important;
+  }
+  .student-dashboard-stat-value {
+    font-size: 1.2rem !important;
+  }
+  .student-dashboard-stat-label {
+    font-size: 0.8rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .student-dashboard-header-title {
+    font-size: 0.85rem !important;
+  }
+  .student-dashboard-section-title {
+    font-size: 0.8rem !important;
+  }
+  .student-dashboard-stat-value {
+    font-size: 1rem !important;
+  }
+  .student-dashboard-stat-label {
+    font-size: 0.7rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .student-dashboard-header-title,
+  .student-dashboard-section-title {
+    font-size: 0.7rem !important;
+  }
+  .student-dashboard-stat-value {
+    font-size: 0.9rem !important;
+  }
+  .student-dashboard-stat-label {
+    font-size: 0.6rem !important;
   }
 }

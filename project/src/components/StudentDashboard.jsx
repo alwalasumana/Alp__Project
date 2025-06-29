@@ -7,12 +7,15 @@ import {
   LogOut,
   Star,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGame } from '../contexts/GameContext';
 import GameCard from './student/GameCard';
+import StudentPerformance from './student/StudentPerformance';
 import { useNavigate } from 'react-router-dom';
+import CameraPermissionModal from './student/CameraPermissionModal';
 import './StudentDashboard.css';
 
 const ALL_GAMES = [
@@ -30,6 +33,9 @@ const StudentDashboard = () => {
   const [assignedGames, setAssignedGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showPerformance, setShowPerformance] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [pendingGame, setPendingGame] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -79,6 +85,46 @@ const StudentDashboard = () => {
     ? Math.round(sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length)
     : 0;
 
+  // Camera permission logic
+  const handleGameClick = (game) => {
+    setPendingGame(game);
+    setShowCameraModal(true);
+  };
+
+  const handleAllowCamera = async () => {
+    setShowCameraModal(false);
+    try {
+      await navigator.mediaDevices.getUserMedia({ video: true });
+      // Navigate to the game after permission
+      switch (pendingGame.id) {
+        case 'memory-match':
+          navigate('/game/memory-match');
+          break;
+        case 'math-challenge':
+          navigate('/game/math-challenge');
+          break;
+        case 'pattern-recognition':
+          navigate('/game/pattern-recognition');
+          break;
+        default:
+          break;
+      }
+    } catch (err) {
+      alert('Camera access denied. You cannot play this game without camera access.');
+    }
+  };
+
+  const handleDenyCamera = () => {
+    setShowCameraModal(false);
+    alert('Camera access is required to play this game.');
+  };
+
+  if (showPerformance) {
+    return (
+      <StudentPerformance onBack={() => setShowPerformance(false)} />
+    );
+  }
+
   if (loading) {
     return (
       <div className="student-dashboard-bg">
@@ -99,6 +145,13 @@ const StudentDashboard = () => {
 
   return (
     <div className="student-dashboard-bg">
+      {/* Camera Permission Modal */}
+      {showCameraModal && (
+        <CameraPermissionModal
+          onAllow={handleAllowCamera}
+          onDeny={handleDenyCamera}
+        />
+      )}
       {/* Header */}
       <div className="student-dashboard-header">
         <div className="student-dashboard-header-inner">
@@ -112,6 +165,14 @@ const StudentDashboard = () => {
             </div>
           </div>
           <div className="student-dashboard-header-right">
+            <button
+              onClick={() => setShowPerformance(true)}
+              className="student-dashboard-performance-btn"
+              style={{ marginRight: '1rem' }}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>View Performance</span>
+            </button>
             <button
               onClick={handleRefresh}
               className="student-dashboard-refresh"
@@ -161,6 +222,15 @@ const StudentDashboard = () => {
               <TrendingUp className="w-6 h-6" />
             </div>
           </div>
+          <div className="student-dashboard-stat-card performance" onClick={() => setShowPerformance(true)}>
+            <div>
+              <p className="student-dashboard-stat-label">View Analytics</p>
+              <p className="student-dashboard-stat-value">📊</p>
+            </div>
+            <div className="icon">
+              <BarChart3 className="w-6 h-6" />
+            </div>
+          </div>
         </div>
 
         {/* Assigned Games */}
@@ -183,21 +253,7 @@ const StudentDashboard = () => {
                 <GameCard
                   key={game.id}
                   game={game}
-                  onClick={() => {
-                    switch (game.id) {
-                      case 'memory-match':
-                        navigate('/game/memory-match');
-                        break;
-                      case 'math-challenge':
-                        navigate('/game/math-challenge');
-                        break;
-                      case 'pattern-recognition':
-                        navigate('/game/pattern-recognition');
-                        break;
-                      default:
-                        break;
-                    }
-                  }}
+                  onClick={() => handleGameClick(game)}
                 />
               ))}
             </div>

@@ -39,3 +39,44 @@
   margin-bottom: 12px;
   background: #f3f4f6;
 }
+
+/* --- Enhanced Responsive Styles --- */
+@media (max-width: 600px) {
+  .emotion-webcam-container {
+    padding: 1rem 0.5rem;
+    width: 100vw;
+    min-width: 0;
+  }
+  .emotion-webcam-title {
+    font-size: 1.2rem;
+  }
+  .emotion-webcam-video {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+  }
+  .emotion-webcam-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* --- Ultra-Mobile Responsive Styles --- */
+@media (max-width: 480px) {
+  .emotion-webcam-title {
+    font-size: 1rem !important;
+  }
+  .emotion-webcam-video {
+    max-width: 200px !important;
+  }
+}
+@media (max-width: 400px) {
+  .emotion-webcam-title {
+    font-size: 0.9rem !important;
+  }
+}
+@media (max-width: 360px) {
+  .emotion-webcam-title {
+    font-size: 0.8rem !important;
+  }
+}
