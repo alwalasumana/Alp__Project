@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -15,13 +16,17 @@ const app = express();
 const PORT = 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
+console.log('Current working directory:', process.cwd());
+
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/alp_project', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/alp_project', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
+
+console.log('MONGO_URI:', process.env.MONGO_URI);
 
 // ✅ Fix: Middleware must be before routes
 app.use(cors());
