@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EmotionWebcam from './EmotionWebcam';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
@@ -16,7 +16,9 @@ function shuffle(array) {
 
 const MemoryMatchGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession } = useGame();
+  const { addGameSession, completeAssignment } = useGame();
+  const location = useLocation();
+  const assignmentId = location.state?.assignmentId;
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
   const [cards, setCards] = useState([]); // {id, value, isFlipped, isMatched}
   const [flipped, setFlipped] = useState([]); // indices of flipped cards
@@ -161,7 +163,6 @@ const MemoryMatchGame = () => {
         mistakes: moves - cards.length / 2,
         hintsUsed: 0
       });
-
       await savePerformance({
         gameType: 'memory',
         score: score,
@@ -176,24 +177,19 @@ const MemoryMatchGame = () => {
         })),
         emotionalState: mostFrequentEmotion
       });
-
-      await fetch('/api/game/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentId: user.id,
-          gameId: 'memory-match',
-          score: score
-        })
-      });
-
+      // Mark assignment as completed!
+      if (assignmentId) {
+        console.log('🔵 MemoryMatchGame: About to complete assignment:', assignmentId);
+        await completeAssignment(assignmentId);
+        console.log('✅ MemoryMatchGame: Assignment marked as completed:', assignmentId);
+      } else {
+        console.log('⚠️ MemoryMatchGame: No assignmentId found');
+      }
       setSubmitted(true);
       setSaving(false);
-      
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
-      
     } catch (error) {
       console.error('Error saving game result:', error);
       setSaving(false);

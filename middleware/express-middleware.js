@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Assignment = require('./models/Assignment');
 
 // Use node-fetch if needed
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -381,6 +382,65 @@ app.post('/api/emotion', async (req, res) => {
   } catch (err) {
     console.error('❌ FastAPI request failed:', err.message);
     res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+// POST: Assign a game
+app.post('/api/assignments', async (req, res) => {
+  try {
+    const assignment = new Assignment(req.body);
+    await assignment.save();
+    res.status(201).json({ success: true, assignment });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET: Get assignments for a student
+app.get('/api/assignments/:studentId', async (req, res) => {
+  try {
+    const assignments = await Assignment.find({ studentId: req.params.studentId });
+    res.json({ success: true, assignments });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// (Optional) GET all assignments for therapist dashboard
+app.get('/api/assignments', async (req, res) => {
+  try {
+    const assignments = await Assignment.find();
+    res.json({ success: true, assignments });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.patch('/api/assignments/:id', async (req, res) => {
+  console.log('🔵 PATCH /api/assignments/:id called');
+  console.log('🔵 Assignment ID:', req.params.id);
+  console.log('🔵 Request body:', req.body);
+  console.log('🔵 Status to update:', req.body.status);
+  
+  try {
+    const assignment = await Assignment.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
+    
+    console.log('🔵 Assignment found and updated:', assignment);
+    
+    if (!assignment) {
+      console.log('❌ Assignment not found with ID:', req.params.id);
+      return res.status(404).json({ success: false, error: 'Assignment not found' });
+    }
+    
+    console.log('✅ Assignment status updated successfully to:', assignment.status);
+    res.json({ success: true, assignment });
+  } catch (err) {
+    console.error('❌ Error updating assignment:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

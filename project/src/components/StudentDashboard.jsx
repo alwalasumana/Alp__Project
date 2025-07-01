@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   TowerControl as GameController2,
   Trophy,
@@ -26,37 +26,38 @@ const ALL_GAMES = [
 
 const StudentDashboard = () => {
   const { user, logout, getPerformance } = useAuth();
-  const { games, getStudentAssignments, getGameById } = useGame();
+  const { games, getStudentAssignments, getGameById, assignments } = useGame();
   const navigate = useNavigate();
 
   const [sessions, setSessions] = useState([]);
-  const [assignedGames, setAssignedGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showPerformance, setShowPerformance] = useState(false);
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [pendingGame, setPendingGame] = useState(null);
+  const pollingRef = useRef();
 
   const fetchData = async () => {
     try {
-      // Try to get assignments, do not fallback to all games
-      let assigned = [];
-      try {
-        const assignments = getStudentAssignments ? getStudentAssignments(user._id) : [];
-        assigned = assignments
-          .filter(assignment => assignment.status !== 'completed')
-          .map(assignment => getGameById ? getGameById(assignment.gameId) : null)
+      if (getStudentAssignments && user?._id) {
+        const backendAssignments = await getStudentAssignments(user._id);
+        console.log('🔵 Fetched assignments:', backendAssignments);
+        // Only show assignments that are not completed or inactive and have a valid game
+        const activeGames = backendAssignments
+          .filter(a => a.status !== 'completed' && a.status !== 'inactive')
+          .map(a => getGameById(a.gameId))
           .filter(Boolean);
-      } catch (err) {
-        assigned = [];
+        console.log('🔵 Active games:', activeGames);
+      } else {
+        setSessions([]);
       }
-      setAssignedGames(assigned);
 
       // Fetch performance sessions
-      const perfResult = await getPerformance(user._id, null, 100);
-      setSessions(perfResult.success ? perfResult.performances : []);
+      const perfResult = await getPerformance?.(user._id, null, 100);
+      setSessions(perfResult?.success ? perfResult.performances : []);
     } catch (error) {
-      setAssignedGames([]);
+      console.error('Error fetching data:', error);
+      setSessions([]);
     }
   };
 
@@ -67,13 +68,30 @@ const StudentDashboard = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
     const loadData = async () => {
-      setLoading(true);
-      await fetchData();
-      setLoading(false);
+      try {
+        if (!user?._id) return;
+        setLoading(true);
+        await fetchData();
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
     };
-    if (user?._id) loadData();
-  }, [user, getPerformance, getStudentAssignments, getGameById]);
+    loadData();
+
+    // Poll every 10 seconds for new assignments
+    pollingRef.current = setInterval(() => {
+      if (user?._id) fetchData();
+    }, 10000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(pollingRef.current);
+    };
+  }, [user?._id]);
 
   // Recent sessions
   const recentSessions = sessions
@@ -242,20 +260,26 @@ const StudentDashboard = () => {
               <span>Ready to play</span>
             </div>
           </div>
-          {assignedGames.length > 0 ? (
+          {assignments && assignments.filter(a => a.status !== 'completed' && a.status !== 'inactive').length > 0 ? (
             <div style={{
               display: 'flex',
               flexWrap: 'wrap',
               gap: '1.5rem',
               justifyContent: 'flex-start'
             }}>
-              {assignedGames.map((game) => (
-                <GameCard
-                  key={game.id}
-                  game={game}
-                  onClick={() => handleGameClick(game)}
-                />
-              ))}
+              {assignments
+                .filter(a => a.status !== 'completed' && a.status !== 'inactive')
+                .map(a => {
+                  const game = getGameById(a.gameId);
+                  if (!game) return null;
+                  return (
+                    <GameCard
+                      key={a.id || a._id}
+                      game={game}
+                      onClick={() => navigate(`/game/${game.id}`, { state: { assignmentId: a.id || a._id } })}
+                    />
+                  );
+                })}
             </div>
           ) : (
             <div className="student-dashboard-no-games">

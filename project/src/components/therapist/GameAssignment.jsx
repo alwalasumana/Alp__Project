@@ -7,7 +7,7 @@ import './GameAssignment.css';
 
 const GameAssignment = () => {
   const { user, getStudents } = useAuth();
-  const { games, assignments, assignGame, getGameById } = useGame();
+  const { games, assignments, assignGame, getGameById, getAllAssignments } = useGame();
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState('');
   const [selectedGame, setSelectedGame] = useState('');
@@ -19,6 +19,9 @@ const GameAssignment = () => {
 
   useEffect(() => {
     fetchStudents();
+    getAllAssignments();
+    const interval = setInterval(getAllAssignments, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStudents = async () => {
@@ -70,6 +73,13 @@ const GameAssignment = () => {
       default: return <Clock className="w-4 h-4" />;
     }
   };
+
+  const visibleAssignments = assignments.filter(a => {
+    if (a.status === 'completed' || a.status === 'inactive') return false;
+    const game = getGameById(a.gameId);
+    const student = students.find(s => s._id === a.studentId);
+    return !!game && !!student;
+  });
 
   if (loading) {
     return (
@@ -166,12 +176,12 @@ const GameAssignment = () => {
           </div>
         )}
         <div className="game-assignment-list">
-          {assignments.length > 0 ? (
-            assignments.map((assignment) => {
+          {visibleAssignments.length > 0 ? (
+            visibleAssignments.map((assignment) => {
               const game = getGameById(assignment.gameId);
               const student = students.find(s => s._id === assignment.studentId);
               return (
-                <div key={assignment.id} className="game-assignment-card">
+                <div key={assignment.id || assignment._id} className="game-assignment-card">
                   <div className="game-assignment-card-header">
                     <div className="game-assignment-card-header-left">
                       <div className={`game-assignment-game-icon ${game?.color || ''}`}>

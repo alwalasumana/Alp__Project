@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -13,7 +13,19 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  // Restore user and token from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
+    }
+    setIsAuthLoading(false);
+  }, []);
 
   // Check if user is authenticated on app load
   useEffect(() => {
@@ -34,6 +46,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
       } else {
         // Token is invalid, clear it
         logout();
@@ -44,40 +57,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUser(data.user);
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
-        setIsLoading(false);
-        return true;
-      } else {
-        setIsLoading(false);
-        return false;
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setIsLoading(false);
-      return false;
-    }
+  // Login function: save user and token to localStorage
+  const login = (userData, authToken) => {
+    setUser(userData);
+    setToken(authToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', authToken);
   };
 
   const register = async (userData) => {
     setIsLoading(true);
-    
     try {
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
@@ -86,9 +75,7 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify(userData)
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setIsLoading(false);
         return { success: true, message: data.message };
@@ -103,10 +90,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout: clear user and token from state and localStorage
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const savePerformance = async (performanceData) => {
@@ -238,17 +227,20 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
+    token,
+    setToken,
     login,
-    register,
     logout,
+    register,
     isLoading,
+    isAuthLoading,
+    fetchProfile,
     savePerformance,
     getPerformance,
     getStudents,
     forgotPassword,
-    resetPassword,
-    token,
-    refreshProfile: fetchProfile
+    resetPassword
   };
 
   return (

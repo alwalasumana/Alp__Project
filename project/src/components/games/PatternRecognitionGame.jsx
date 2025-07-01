@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EmotionWebcam from './EmotionWebcam';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
@@ -17,7 +17,7 @@ function getRandomQuestion(pool, usedIndices) {
 
 const PatternRecognitionGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession } = useGame();
+  const { addGameSession, completeAssignment } = useGame();
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
   const [currentPool, setCurrentPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
@@ -35,6 +35,8 @@ const PatternRecognitionGame = () => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState(null);
+  const location = useLocation();
+  const assignmentId = location.state?.assignmentId;
 
   // Load questions from JSON file
   useEffect(() => {
@@ -200,15 +202,13 @@ const PatternRecognitionGame = () => {
         emotionalState: mostFrequentEmotion
       });
 
-      await fetch('/api/game/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentId: user.id,
-          gameId: 'pattern-recognition',
-          score: score
-        })
-      });
+      if (assignmentId) {
+        console.log('🔵 PatternRecognitionGame: About to complete assignment:', assignmentId);
+        await completeAssignment(assignmentId);
+        console.log('✅ PatternRecognitionGame: Assignment marked as completed:', assignmentId);
+      } else {
+        console.log('⚠️ PatternRecognitionGame: No assignmentId found');
+      }
 
       setSubmitted(true);
       setSaving(false);

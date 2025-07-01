@@ -1,16 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
+import axios from 'axios';
 
 const GameContext = createContext();
 
 export const useGame = () => {
   const context = useContext(GameContext);
-  if (context === undefined) {
-    throw new Error('useGame must be used within a GameProvider');
-  }
+  if (!context) throw new Error('useGame must be used within a GameProvider');
   return context;
 };
 
-// Game definitions (these are static and don't need to be removed)
 const games = [
   {
     id: 'memory-match',
@@ -20,7 +18,7 @@ const games = [
     difficulty: 'medium',
     icon: 'Brain',
     color: 'bg-purple-500',
-    estimatedTime: 10 
+    estimatedTime: 10
   },
   {
     id: 'math-challenge',
@@ -45,7 +43,6 @@ const games = [
 ];
 
 export const GameProvider = ({ children }) => {
-  // Initialize with empty arrays instead of mock data
   const [gameSessions, setGameSessions] = useState([]);
   const [assignments, setAssignments] = useState([]);
 
@@ -53,26 +50,61 @@ export const GameProvider = ({ children }) => {
     setGameSessions(prev => [...prev, { ...session, id: `session-${Date.now()}` }]);
   };
 
-  const assignGame = (assignment) => {
-    const newAssignment = {
-      ...assignment,
-      id: `assign-${Date.now()}`,
-      assignedAt: new Date().toISOString(),
-      status: 'assigned'
-    };
-    setAssignments(prev => [...prev, newAssignment]);
+  const assignGame = async (assignment) => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/assignments', assignment);
+      if (res.data.success) {
+        setAssignments(prev => [...prev, res.data.assignment]);
+      }
+    } catch (err) {
+      console.error('Error assigning game:', err);
+    }
   };
 
-  const getStudentSessions = (studentId) => {
-    return gameSessions.filter(session => session.studentId === studentId);
+  const getStudentAssignments = async (studentId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/assignments/${studentId}`);
+      if (res.data.success) {
+        setAssignments(res.data.assignments);
+        return res.data.assignments;
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching assignments:', err);
+      return [];
+    }
   };
 
-  const getStudentAssignments = (studentId) => {
-    return assignments.filter(assignment => assignment.studentId === studentId);
+  const getAllAssignments = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/assignments');
+      if (res.data.success) {
+        setAssignments(res.data.assignments);
+        return res.data.assignments;
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching all assignments:', err);
+      return [];
+    }
   };
 
   const getGameById = (gameId) => {
     return games.find(game => game.id === gameId);
+  };
+
+  const completeAssignment = async (assignmentId) => {
+    try {
+      console.log('🔵 completeAssignment called with ID:', assignmentId);
+      const response = await axios.patch(`http://localhost:5000/api/assignments/${assignmentId}`, {
+        status: 'completed'
+      });
+      console.log('✅ Assignment completed successfully:', response.data);
+      // Optionally update local state
+    } catch (err) {
+      console.error('❌ Error marking assignment as completed:', err);
+      console.error('❌ Error details:', err.response?.data || err.message);
+    }
   };
 
   const value = {
@@ -81,14 +113,11 @@ export const GameProvider = ({ children }) => {
     assignments,
     addGameSession,
     assignGame,
-    getStudentSessions,
     getStudentAssignments,
-    getGameById
+    getAllAssignments,
+    getGameById,
+    completeAssignment
   };
 
-  return (
-    <GameContext.Provider value={value}>
-      {children}
-    </GameContext.Provider>
-  );
+  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };

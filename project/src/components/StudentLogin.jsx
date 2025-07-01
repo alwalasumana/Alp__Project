@@ -15,11 +15,21 @@ const StudentLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const success = await login(email, password);
-    if (success) {
-      navigate('/dashboard/student');
-    } else {
-      setError('Invalid email or password');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.user && data.token) {
+        login(data.user, data.token);
+        navigate('/dashboard/student');
+      } else {
+        setError(data.error || 'Invalid email or password');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
     }
   };
 

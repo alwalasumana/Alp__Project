@@ -2,6 +2,8 @@ import React from 'react';
 import { Play, Clock, Star } from 'lucide-react';
 
 const GameCard = ({ game, onClick }) => {
+  if (!game) return null; // Defensive check to prevent errors
+
   const difficultyColors = {
     easy: 'bg-green-100 text-green-800',
     medium: 'bg-yellow-100 text-yellow-800',

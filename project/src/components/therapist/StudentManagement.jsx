@@ -158,9 +158,9 @@ const StudentCard = ({ student, navigate, onEditPath }) => {
       // Fetch assignments
       let activeAssignments = 0;
       if (getStudentAssignments) {
-        const assignments = getStudentAssignments(student._id);
+        const assignments = await getStudentAssignments(student._id);
         if (Array.isArray(assignments)) {
-          activeAssignments = assignments.filter(a => a.status === 'active' || a.status === 'assigned').length;
+          activeAssignments = assignments.filter(a => a.status !== 'completed').length;
         }
       }
 

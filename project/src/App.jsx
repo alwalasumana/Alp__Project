@@ -16,6 +16,7 @@ import PatternRecognitionGame from './components/games/PatternRecognitionGame.js
 import GameAssignment from './components/therapist/GameAssignment.jsx';
 import PerformanceAnalytics from './components/therapist/PerformanceAnalytics.jsx';
 import StudentManagement from './components/therapist/StudentManagement.jsx';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -29,8 +30,22 @@ function AppRoutes() {
       <Route path="/register/therapist" element={<TherapistRegister />} />
       <Route path="/forgot-password/student" element={<ForgotPassword userType="student" />} />
       <Route path="/forgot-password/therapist" element={<ForgotPassword userType="therapist" />} />
-      <Route path="/dashboard/student" element={user?.role === 'student' ? <StudentDashboard /> : <Navigate to="/" />} />
-      <Route path="/dashboard/therapist" element={user?.role === 'therapist' ? <TherapistDashboard /> : <Navigate to="/" />} />
+      <Route
+        path="/dashboard/student"
+        element={
+          <ProtectedRoute role="student">
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/therapist"
+        element={
+          <ProtectedRoute role="therapist">
+            <TherapistDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/game/math-challenge" element={<MathChallengeGame />} />
       <Route path="/game/memory-match" element={<MemoryMatchGame />} />
       <Route path="/game/pattern-recognition" element={<PatternRecognitionGame />} />

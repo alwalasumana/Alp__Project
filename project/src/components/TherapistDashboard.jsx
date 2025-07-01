@@ -15,7 +15,7 @@ import './TherapistDashboard.css';
 
 const TherapistDashboard = () => {
   const { user, logout, getStudents, getPerformance } = useAuth();
-  const { gameSessions, assignments } = useGame();
+  const { gameSessions, assignments, getAllAssignments } = useGame();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -66,9 +66,26 @@ const TherapistDashboard = () => {
 
   const refreshDashboard = async () => {
     setRefreshing(true);
-    await fetchDashboardStats();
-    setRefreshing(false);
+    try {
+      // Refresh assignments first
+      await getAllAssignments();
+      // Then refresh dashboard stats
+      await fetchDashboardStats();
+    } catch (error) {
+      console.error('Error refreshing dashboard:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  // Auto-refresh assignments when they change
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getAllAssignments();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [getAllAssignments]);
 
   useEffect(() => {
     fetchDashboardStats();
@@ -171,7 +188,7 @@ const StatCard = ({ title, value, Icon, color }) => {
           <p className="therapist-dashboard-stat-value">{value}</p>
         </div>
         <div className={`therapist-dashboard-stat-icon therapist-dashboard-stat-icon-${color}`}>
-          <Icon className={`therapist-dashboard-stat-icon-svg`} />
+          <Icon className="therapist-dashboard-stat-icon-svg" />
         </div>
       </div>
     </div>

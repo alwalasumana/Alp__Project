@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EmotionWebcam from './EmotionWebcam';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
@@ -35,7 +35,7 @@ function getLevelFromLastThreeEmotions(emotions) {
 
 const MathChallengeGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession } = useGame();
+  const { addGameSession, completeAssignment } = useGame();
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
   const [currentPool, setCurrentPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
@@ -53,6 +53,10 @@ const MathChallengeGame = () => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [startTime, setStartTime] = useState(null);
+  const location = useLocation();
+
+  // Get assignmentId from route state
+  const assignmentId = location.state?.assignmentId;
 
   // Fetch questions from static JSON
   useEffect(() => {
@@ -159,12 +163,9 @@ const MathChallengeGame = () => {
 
   const handleGameSubmit = async () => {
     if (!user) return;
-    
     setSaving(true);
-    
     try {
       console.log('Emotion history for this session:', emotionHistory.current);
-
       const mostFrequentEmotion = getMostFrequentEmotion(
         emotionHistory.current.map(e => typeof e === 'string' ? e : e.emotion)
       );
@@ -180,7 +181,6 @@ const MathChallengeGame = () => {
         mistakes: TOTAL_QUESTIONS - score,
         hintsUsed: 0
       });
-
       await savePerformance({
         gameType: 'math',
         score: score,
@@ -195,34 +195,31 @@ const MathChallengeGame = () => {
         })),
         emotionalState: mostFrequentEmotion
       });
-
-      // After saving performance, update learning path progress
-      try {
-        await fetch('/api/game/complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            studentId: user.id,
-            gameId: 'math-challenge',
-            score: score
-          })
-        });
-      } catch (err) {
-        console.error('Failed to update learning path progress:', err);
+      // Mark assignment as completed!
+      if (assignmentId) {
+        console.log('🔵 MathChallengeGame: About to complete assignment:', assignmentId);
+        await completeAssignment(assignmentId);
+        console.log('✅ MathChallengeGame: Assignment marked as completed:', assignmentId);
+      } else {
+        console.log('⚠️ MathChallengeGame: No assignmentId found');
       }
-
       setSubmitted(true);
       setSaving(false);
-      
-      // Navigate back to dashboard after a short delay
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
-      
     } catch (error) {
       console.error('Error saving game result:', error);
       setSaving(false);
       alert('Failed to save result. Please try again.');
+    }
+  };
+
+  const handleGameFinish = async () => {
+    if (assignmentId) {
+      await completeAssignment(assignmentId);
+      console.log('Assignment marked as completed:', assignmentId);
+      navigate('/dashboard/student');
     }
   };
 
