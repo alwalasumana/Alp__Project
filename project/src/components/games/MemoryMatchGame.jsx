@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
 import './MemoryMatchGame.css';
 
-const QUESTIONS_URL = '/data/memoryQuestions.json';
+const QUESTIONS_URL = 'http://localhost:5000/api/questions/memory';
 
 function shuffle(array) {
   return array
@@ -65,8 +65,12 @@ const MemoryMatchGame = () => {
 
   // Start game when questions are loaded
   useEffect(() => {
-    if (questions.medium.length > 0 && cards.length === 0) {
-      startNewGame('medium');
+    if (cards.length === 0) {
+      const availableLevels = Object.keys(questions).filter(level => questions[level] && questions[level].length > 0);
+      if (availableLevels.length > 0) {
+        const randomLevel = availableLevels[Math.floor(Math.random() * availableLevels.length)];
+        startNewGame(randomLevel);
+      }
     }
     // eslint-disable-next-line
   }, [questions]);

@@ -12,8 +12,8 @@ const LandingPage = () => {
         <div className="landing-logo">
           <Brain className="landing-logo-icon" />
         </div>
-        <h1 className="landing-title">ALP</h1>
-        <p className="landing-subtitle">Adaptive Learning Path Platform</p>
+        <h1 className="landing-title">Adapto</h1>
+        <p className="landing-subtitle">Emotion-Centric Adaptive Education</p>
         <p className="landing-desc">
           Personalized, emotion-aware learning games for students and therapists.
         </p>

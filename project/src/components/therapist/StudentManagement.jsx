@@ -170,7 +170,10 @@ const StudentCard = ({ student, navigate, onEditPath, onPathAssigned }) => {
     <div className="student-card">
       <div className="student-card-top">
         <img
-          src={student.avatar || 'https://images.pexels.com/photos/8923059/pexels-photo-8923059.jpeg?auto=compress&cs=tinysrgb&w=400'}
+          src={
+            student.avatar ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}`
+          }
           alt={student.name}
           className="student-card-avatar"
         />

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
 import './PatternRecognitionGame.css';
 
-const QUESTIONS_URL = '/data/patternQuestions.json';
+const QUESTIONS_URL = 'http://localhost:5000/api/questions/pattern';
 const TOTAL_QUESTIONS = 5;
 
 function getRandomQuestion(pool, usedIndices) {

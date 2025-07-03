@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Assignment = require('./models/Assignment');
+const Question = require('./models/Question');
 
 // Using built-in fetch (available in Node.js 18+)
 
@@ -581,6 +582,26 @@ app.delete('/api/pending-therapist/:userId', authenticateToken, requireSuperadmi
     res.json({ message: 'Pending therapist rejected and deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to reject therapist' });
+  }
+});
+
+// GET: Fetch questions by type (math, memory, pattern)
+app.get('/api/questions/:type', async (req, res) => {
+  try {
+    const { type } = req.params;
+    if (!['math', 'memory', 'pattern'].includes(type)) {
+      return res.status(400).json({ error: 'Invalid question type' });
+    }
+    const questions = await Question.find({ type });
+    // Group by difficulty
+    const grouped = { easy: [], medium: [], hard: [] };
+    questions.forEach(q => {
+      if (grouped[q.difficulty]) grouped[q.difficulty].push(q.data);
+    });
+    res.json(grouped);
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    res.status(500).json({ error: 'Failed to fetch questions' });
   }
 });
 
