@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, GraduationCap, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './StudentLogin.css';
+import './StudentRegister.css';
 
 const StudentRegister = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,10 @@ const StudentRegister = () => {
   const [success, setSuccess] = useState('');
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [numberOfSubjects, setNumberOfSubjects] = useState('');
+  const [subjects, setSubjects] = useState([]);
+  const [step, setStep] = useState(1); // 1: basic info, 2: subjects
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchTherapists();
@@ -45,182 +50,233 @@ const StudentRegister = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleBasicInfoSubmit = (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    // Validation
-    if (!formData.name.trim()) {
-      setError('Name is required');
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      return;
-    }
-
-    if (!formData.email.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
+    setError('');
+    setStep(2);
+  };
 
+  const handleNumberOfSubjects = (e) => {
+    const num = parseInt(e.target.value) || '';
+    setNumberOfSubjects(num);
+    if (num > 0) {
+      setSubjects(Array.from({ length: num }, () => ({
+        name: '',
+        interest: 'High',
+        difficulty: 'Easy'
+      })));
+    } else {
+      setSubjects([]);
+    }
+  };
+
+  const handleSubjectChange = (index, field, value) => {
+    const updated = [...subjects];
+    updated[index][field] = value;
+    setSubjects(updated);
+  };
+
+  const handleFinalSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
     if (!formData.therapistId) {
-      setError('Please select a therapist');
+      setError('Please select a therapist.');
+      setLoading(false);
       return;
     }
-
-    const userData = {
-      name: formData.name.trim(),
-      email: formData.email.trim().toLowerCase(),
-      password: formData.password,
-      role: 'student',
-      therapistId: formData.therapistId
-    };
-
-    const result = await register(userData);
-    
-    if (result.success) {
-      setSuccess('Registration successful! You can now login.');
-      setTimeout(() => {
+    try {
+      console.log('Registration payload:', {
+        ...formData,
+        role: 'student',
+        subjects
+      });
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          role: 'student',
+          subjects
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data.user) {
+        // Redirect instantly to student login page
         navigate('/login/student');
-      }, 2000);
-    } else {
-      setError(result.message);
+      } else {
+        setError(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="student-login-bg">
-      <div className="student-login-card">
-        <div className="student-login-header">
-          <div className="student-login-icon">
-            <GraduationCap className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="student-login-title">Student Registration</h1>
-        </div>
-        <form onSubmit={handleSubmit} className="student-login-form">
-          <div className="student-login-input-wrap">
-            <User className="student-login-icon-left w-5 h-5" />
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="student-login-input"
-              placeholder="Full Name"
-              required
-            />
-          </div>
-          <div className="student-login-input-wrap">
-            <Mail className="student-login-icon-left w-5 h-5" />
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="student-login-input"
-              placeholder="Email Address"
-              required
-            />
-          </div>
-          <div className="student-login-input-wrap">
-            <Lock className="student-login-icon-left w-5 h-5" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="student-login-input"
-              placeholder="Password (min 6 characters)"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="student-login-icon-right"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          <div className="student-login-input-wrap">
-            <Lock className="student-login-icon-left w-5 h-5" />
-            <input
-              type={showConfirmPassword ? 'text' : 'password'}
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="student-login-input"
-              placeholder="Confirm Password"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword((v) => !v)}
-              className="student-login-icon-right"
-              tabIndex={-1}
-            >
-              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
-          <div className="student-login-input-wrap">
-            <select
-              name="therapistId"
-              value={formData.therapistId}
-              onChange={handleChange}
-              className="student-login-input"
-              required
-            >
-              <option value="">Select Therapist</option>
-              {therapists.map((therapist) => (
-                <option key={therapist._id} value={therapist._id}>
-                  {therapist.name} ({therapist.email})
-                </option>
-              ))}
-            </select>
-          </div>
-          {error && (
-            <div className="student-login-error">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
+    <div className="student-register-bg">
+      <div className="student-register-container">
+        <h2 className="student-register-title">Student Registration</h2>
+        {step === 1 ? (
+          <form className="student-register-form" onSubmit={handleBasicInfoSubmit}>
+            <div className="student-register-form-group">
+              <label>Full Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
             </div>
-          )}
-          {success && (
-            <div className="student-login-success">
-              <span>{success}</span>
+            <div className="student-register-form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
             </div>
-          )}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="student-login-btn"
-          >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-        <div className="student-login-footer">
-          <p className="student-login-text">Already have an account?</p>
-          <button
-            onClick={() => navigate('/login/student')}
-            className="student-login-link"
-            type="button"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Login
-          </button>
-        </div>
+            <div className="student-register-form-group">
+              <label>Password (min 6 characters)</label>
+              <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={e => setFormData({ ...formData, password: e.target.value })}
+                  required
+                  minLength={6}
+                  style={{ flex: 1, paddingRight: '2.5em' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="student-register-icon-right"
+                  tabIndex={-1}
+                  style={{ position: 'absolute', right: '0.5em', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div className="student-register-form-group">
+              <label>Confirm Password</label>
+              <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  required
+                  minLength={6}
+                  style={{ flex: 1, paddingRight: '2.5em' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className="student-register-icon-right"
+                  tabIndex={-1}
+                  style={{ position: 'absolute', right: '0.5em', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+            <div className="student-register-form-group">
+              <label>Select Therapist</label>
+              <select
+                value={formData.therapistId}
+                onChange={e => setFormData({ ...formData, therapistId: e.target.value })}
+                className="student-register-input"
+                required
+              >
+                <option value="">Select Therapist</option>
+                {therapists.map((therapist) => (
+                  <option key={therapist._id} value={therapist._id}>
+                    {therapist.name} ({therapist.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button className="student-register-btn" type="submit">
+              Next: Add Subjects
+            </button>
+            {error && <div className="student-register-error">{error}</div>}
+          </form>
+        ) : (
+          <form className="student-register-form" onSubmit={handleFinalSubmit}>
+            <div className="student-register-form-group">
+              <label>How many subjects do you study?</label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={numberOfSubjects}
+                onChange={handleNumberOfSubjects}
+                required
+              />
+            </div>
+            {subjects.length > 0 && (
+              <div className="subjects-section">
+                <h3>Enter Your Subjects</h3>
+                {subjects.map((subject, idx) => (
+                  <div key={idx} className="subject-input-group">
+                    <h4>Subject {idx + 1}</h4>
+                    <div className="subject-field">
+                      <label>Subject Name</label>
+                      <input
+                        type="text"
+                        value={subject.name}
+                        onChange={e => handleSubjectChange(idx, 'name', e.target.value)}
+                        placeholder="e.g., Physics, Chemistry"
+                        required
+                      />
+                    </div>
+                    <div className="subject-field">
+                      <label>Interest Level</label>
+                      <select
+                        value={subject.interest}
+                        onChange={e => handleSubjectChange(idx, 'interest', e.target.value)}
+                      >
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </select>
+                    </div>
+                    <div className="subject-field">
+                      <label>Difficulty Level</label>
+                      <select
+                        value={subject.difficulty}
+                        onChange={e => handleSubjectChange(idx, 'difficulty', e.target.value)}
+                      >
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="student-register-actions">
+              <button
+                type="button"
+                className="student-register-back-btn"
+                onClick={() => setStep(1)}
+              >
+                Back
+              </button>
+              <button className="student-register-btn" type="submit">
+                Complete Registration
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

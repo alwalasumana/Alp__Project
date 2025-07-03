@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import './LoginForm.css';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -19,29 +20,29 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <LogIn className="w-8 h-8 text-white" />
+    <div className="login-bg">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="login-logo">
+              <LogIn className="login-logo-icon" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome to ALP</h1>
-            <p className="text-gray-600">Adaptive Learning Path Platform</p>
+            <h1 className="login-title">Welcome to ALP</h1>
+            <p className="login-subtitle">Adaptive Learning Path Platform</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="login-form">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="login-label">
                 Email Address
               </label>
-              <div className="relative">
-                <Mail className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <div className="login-input-wrap">
+                <Mail className="login-input-icon" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="login-input"
                   placeholder="Enter your email"
                   required
                 />
@@ -49,16 +50,16 @@ const LoginForm = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="login-label">
                 Password
               </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <div className="login-input-wrap">
+                <Lock className="login-input-icon" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="login-input"
                   placeholder="Enter your password"
                   required
                 />
@@ -66,16 +67,16 @@ const LoginForm = () => {
             </div>
 
             {error && (
-              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                <AlertCircle className="w-5 h-5" />
-                <span className="text-sm">{error}</span>
+              <div className="login-error">
+                <AlertCircle className="login-error-icon" />
+                <span className="login-error-text">{error}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 rounded-xl font-medium hover:from-purple-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="login-btn"
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>

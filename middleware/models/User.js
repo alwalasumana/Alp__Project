@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -20,13 +19,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'therapist'],
+    enum: ['student', 'therapist', 'superadmin', 'pending_therapist'],
     required: true
-  },
-  // Therapist specific fields
-  specialization: {
-    type: String,
-    default: null
   },
   // Student specific fields
   therapistId: {
@@ -42,25 +36,45 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  currentStreak: {
+  numberOfSubjects: {
     type: Number,
-    default: 0
   },
   joinDate: {
     type: Date,
     default: Date.now
   },
-  avatar: {
-    type: String,
-    default: null
-  },
+  subjects: [{
+    name: {
+      type: String,
+      required: true
+    },
+    interest: {
+      type: String,
+      enum: ['High', 'Medium', 'Low'],
+      required: true
+    },
+    difficulty: {
+      type: String,
+      enum: ['Easy', 'Medium', 'Hard'],
+      required: true
+    }
+  }],
+  assignedPath: [{
+    subjectName: {
+      type: String
+    },
+    difficulty: {
+      type: String
+    },
+    order: {
+      type: Number
+    },
+    notes: {
+      type: String
+    }
+  }]
 }, {
   timestamps: true
 });
-
-// Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
 
 module.exports = mongoose.model('User', userSchema); 

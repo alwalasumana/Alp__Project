@@ -17,7 +17,7 @@ function getRandomQuestion(pool, usedIndices) {
 
 const PatternRecognitionGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession, completeAssignment } = useGame();
+  const { completeAssignment } = useGame();
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
   const [currentPool, setCurrentPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
@@ -26,7 +26,6 @@ const PatternRecognitionGame = () => {
   const [feedback, setFeedback] = useState('');
   const [questionNumber, setQuestionNumber] = useState(1);
   const [isFinished, setIsFinished] = useState(false);
-  const [emotion, setEmotion] = useState('neutral');
   const [score, setScore] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [showNext, setShowNext] = useState(false);
@@ -75,7 +74,6 @@ const PatternRecognitionGame = () => {
   }, [questions, currentPool.length]);
 
   const handleEmotionChange = (newEmotion) => {
-    setEmotion(newEmotion);
     emotionHistory.current.push(newEmotion);
   };
 
@@ -106,8 +104,6 @@ const PatternRecognitionGame = () => {
 
   const handleNext = () => {
     if (questionNumber < TOTAL_QUESTIONS) {
-      const lastThree = emotionHistory.current.slice(-3);
-      console.log('Last 3 emotions for next question difficulty:', lastThree);
       const level = getLevelFromLastThreeEmotions(emotionHistory.current);
       const pool = questions[level] || questions.medium || [];
       
@@ -169,24 +165,11 @@ const PatternRecognitionGame = () => {
   // Complete game submission with performance saving
   const handleGameSubmit = async () => {
     if (!user) return;
-    
     setSaving(true);
-    
     try {
       const mostFrequentEmotion = getMostFrequentEmotion(emotionHistory.current);
       const timeSpent = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
-      await addGameSession({
-        studentId: user.id,
-        gameId: 'pattern-recognition',
-        score: score,
-        accuracy: score / TOTAL_QUESTIONS,
-        timeSpent,
-        emotionalState: mostFrequentEmotion,
-        completedAt: new Date().toISOString(),
-        mistakes: TOTAL_QUESTIONS - score,
-        hintsUsed: 0
-      });
-
+      // Only save to performances collection
       await savePerformance({
         gameType: 'pattern',
         score: score,
@@ -201,22 +184,14 @@ const PatternRecognitionGame = () => {
         })),
         emotionalState: mostFrequentEmotion
       });
-
       if (assignmentId) {
-        console.log('🔵 PatternRecognitionGame: About to complete assignment:', assignmentId);
         await completeAssignment(assignmentId);
-        console.log('✅ PatternRecognitionGame: Assignment marked as completed:', assignmentId);
-      } else {
-        console.log('⚠️ PatternRecognitionGame: No assignmentId found');
       }
-
       setSubmitted(true);
       setSaving(false);
-      
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
-      
     } catch (error) {
       console.error('Error saving game result:', error);
       setSaving(false);
@@ -255,7 +230,6 @@ const PatternRecognitionGame = () => {
     <div className="pattern-game-container">
       <div className="pattern-game-card">
         <h2 className="pattern-game-title">Pattern Recognition Game</h2>
-        
         {!isFinished ? (
           <>
             <div className="pattern-display">
@@ -267,11 +241,9 @@ const PatternRecognitionGame = () => {
                 <span className="pattern-question-mark">?</span>
               </div>
             </div>
-            
             <div className="pattern-moves">
               Question {questionNumber} of {TOTAL_QUESTIONS}
             </div>
-            
             <form onSubmit={handleSubmit} className="pattern-answer-form">
               <input
                 type="number"
@@ -291,7 +263,6 @@ const PatternRecognitionGame = () => {
                 Submit Answer
               </button>
             </form>
-            
             {showNext && (
               <button className="pattern-next-button" onClick={handleNext}>
                 {questionNumber < TOTAL_QUESTIONS ? 'Next Question' : 'Finish Quiz'}
@@ -304,7 +275,6 @@ const PatternRecognitionGame = () => {
             <div className="score-display">
               <h4>Your Score: {score} / 5</h4>
             </div>
-            
             {!submitted && (
               <div className="pattern-end-buttons">
                 <button onClick={handleRestart} className="pattern-restart-button">
@@ -319,7 +289,6 @@ const PatternRecognitionGame = () => {
                 </button>
               </div>
             )}
-            
             {submitted && (
               <div className="pattern-end-message">
                 ✅ Result submitted to therapist!
@@ -327,21 +296,18 @@ const PatternRecognitionGame = () => {
             )}
           </>
         )}
-        
         {feedback && (
           <div className={`pattern-feedback ${feedback.includes('✅') ? 'correct' : 'incorrect'}`}>
             {feedback}
           </div>
         )}
       </div>
-      
       <button 
         onClick={() => navigate('/dashboard/student')} 
         className="pattern-back-button"
       >
         ← Back to Dashboard
       </button>
-      
       <div className="emotion-webcam-container">
         <EmotionWebcam onEmotionChange={handleEmotionChange} />
       </div>

@@ -291,12 +291,11 @@
   }
 }
 @media (max-width: 360px) {
-  .student-login-title {
-    font-size: 0.8rem !important;
+  .student-login-card {
+    padding: 0.5rem 0.1rem;
+    border-radius: 0.7rem;
   }
-  .student-login-input,
-  .student-login-button {
-    font-size: 0.8em !important;
-    padding: 0.3rem 0.4rem !important;
+  .student-login-title {
+    font-size: 1rem;
   }
 }

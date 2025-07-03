@@ -16,7 +16,7 @@ function shuffle(array) {
 
 const MemoryMatchGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession, completeAssignment } = useGame();
+  const { completeAssignment } = useGame();
   const location = useLocation();
   const assignmentId = location.state?.assignmentId;
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
@@ -26,7 +26,6 @@ const MemoryMatchGame = () => {
   const [moves, setMoves] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [emotion, setEmotion] = useState('neutral');
   const emotionHistory = useRef([]);
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
@@ -35,7 +34,6 @@ const MemoryMatchGame = () => {
   const NEGATIVE_EMOTIONS = ['sad', 'angry', 'frustrated', 'fear', 'disgust'];
   const NEGATIVE_THRESHOLD = 3;
   const [temporarilyFlippedPair, setTemporarilyFlippedPair] = useState([]);
-  const [emotionHistoryLength, setEmotionHistoryLength] = useState(0);
 
   // Load questions/cards from JSON
   useEffect(() => {
@@ -75,9 +73,7 @@ const MemoryMatchGame = () => {
 
   // Handle emotion change for next restart
   const handleEmotionChange = (newEmotion) => {
-    setEmotion(newEmotion);
     emotionHistory.current.push(newEmotion);
-    setEmotionHistoryLength(emotionHistory.current.length);
     console.log('Emotion history:', emotionHistory.current);
   };
 
@@ -152,46 +148,38 @@ const MemoryMatchGame = () => {
     try {
       const mostFrequentEmotion = getMostFrequentEmotion(emotionHistory.current);
       const timeSpent = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
-      await addGameSession({
-        studentId: user.id,
-        gameId: 'memory-match',
-        score: score,
-        accuracy: matched.length / (moves * 2),
-        timeSpent,
-        emotionalState: mostFrequentEmotion,
-        completedAt: new Date().toISOString(),
-        mistakes: moves - cards.length / 2,
-        hintsUsed: 0
-      });
+
+      // Save performance data (for analytics dashboard)
       await savePerformance({
         gameType: 'memory',
-        score: score,
-        maxScore: 5,
+        score: moves,      // Only moves
+        moves,             // Explicitly store moves
         accuracy: matched.length / (moves * 2),
         timeSpent,
         difficulty: getLevelFromEmotions(emotionHistory.current),
-        emotions: emotionHistory.current.map(e => ({ 
-          emotion: e, 
-          confidence: 0.9, 
-          timestamp: new Date() 
+        emotions: emotionHistory.current.map(e => ({
+          emotion: e,
+          confidence: 0.9,
+          timestamp: new Date()
         })),
         emotionalState: mostFrequentEmotion
       });
-      // Mark assignment as completed!
+
+      // Mark assignment as completed
       if (assignmentId) {
-        console.log('🔵 MemoryMatchGame: About to complete assignment:', assignmentId);
-        await completeAssignment(assignmentId);
-        console.log('✅ MemoryMatchGame: Assignment marked as completed:', assignmentId);
-      } else {
-        console.log('⚠️ MemoryMatchGame: No assignmentId found');
+        try {
+          await completeAssignment(assignmentId);
+        } catch (assignmentError) {
+          // Continue even if assignment completion fails
+        }
       }
+
       setSubmitted(true);
       setSaving(false);
       setTimeout(() => {
         navigate('/dashboard/student');
       }, 1500);
     } catch (error) {
-      console.error('Error saving game result:', error);
       setSaving(false);
       alert('Failed to save result. Please try again.');
     }
@@ -220,58 +208,41 @@ const MemoryMatchGame = () => {
         }
       }
     }
-  }, [emotionHistoryLength, cards]);
+  }, [emotionHistory.current.length, cards]);
 
-  if (cards.length === 0) return <div>Loading cards...</div>;
+  if (cards.length === 0) return <div className="memory-loading">Loading cards...</div>;
 
   return (
     <div className="memory-game-container">
       <div className="memory-game-card">
-        <h2 style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, marginBottom: 16 }}>Memory Match Game</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 60px)', gridTemplateRows: 'repeat(2, 60px)', gap: 16, justifyContent: 'center', marginBottom: 24 }}>
+        <h2 className="memory-game-title">Memory Match Game</h2>
+        <div className="memory-grid">
           {cards.map((card, idx) => {
             const isTempFlipped = temporarilyFlippedPair.includes(card.id);
+            const cardClass = `memory-card ${card.isMatched ? 'matched' : card.isFlipped ? 'flipped' : ''} ${isTempFlipped ? 'temp-flipped' : ''}`;
             return (
               <div
                 key={card.id}
                 onClick={() => handleCardClick(idx)}
-                style={{
-                  width: 60,
-                  height: 60,
-                  background: card.isMatched ? '#a7f3d0' : (card.isFlipped || isTempFlipped) ? '#fff' : '#6366f1',
-                  color: card.isMatched ? '#fff' : (card.isFlipped || isTempFlipped) ? '#6366f1' : '#fff',
-                  borderRadius: 12,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 32,
-                  fontWeight: 700,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                  cursor: card.isFlipped || card.isMatched || gameOver ? 'default' : 'pointer',
-                  border: (card.isFlipped || isTempFlipped) ? '2px solid #6366f1' : '2px solid #e0e7ff',
-                  transition: 'all 0.3s',
-                  userSelect: 'none',
-                  outline: isTempFlipped ? '3px solid #fbbf24' : undefined,
-                  outlineOffset: isTempFlipped ? '2px' : undefined,
-                }}
+                className={cardClass}
               >
                 {(card.isFlipped || card.isMatched || isTempFlipped) ? card.value : '❓'}
               </div>
             );
           })}
         </div>
-        <div style={{ textAlign: 'center', marginBottom: 16, fontWeight: 500 }}>
+        <div className="memory-moves-display">
           Moves: {moves}
         </div>
         {gameOver && !submitted && (
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <h3 style={{ fontSize: 22, color: '#059669', fontWeight: 700, marginBottom: 12 }}>🎉 Game Completed!</h3>
-            <p style={{ marginBottom: 16 }}>You matched all pairs in {moves} moves.</p>
-            <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 12 }}>Score: {score} / 5</div>
-            <button onClick={handleRestart} style={{ padding: '10px 24px', background: '#6366f1', color: 'white', borderRadius: 8, border: 'none', fontWeight: 600, fontSize: 16, marginRight: 12 }}>Restart</button>
+          <div className="memory-completion-container">
+            <h3 className="memory-completion-title">🎉 Game Completed!</h3>
+            <p className="memory-completion-text">You matched all pairs in {moves} moves.</p>
+            <div className="memory-score-display">Score: {score} / 5</div>
+            <button onClick={handleRestart} className="memory-restart-btn">Restart</button>
             <button 
               onClick={handleSubmit} 
-              style={{ padding: '10px 24px', background: '#059669', color: 'white', borderRadius: 8, border: 'none', fontWeight: 600, fontSize: 16 }}
+              className="memory-submit-btn"
               disabled={saving}
             >
               {saving ? 'Saving...' : 'Submit'}
@@ -279,7 +250,7 @@ const MemoryMatchGame = () => {
           </div>
         )}
         {submitted && (
-          <div style={{ textAlign: 'center', marginTop: 24, color: '#059669', fontWeight: 600, fontSize: 18 }}>
+          <div className="memory-submitted-message">
             Result submitted to therapist!
           </div>
         )}

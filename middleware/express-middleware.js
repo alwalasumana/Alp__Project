@@ -6,8 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Assignment = require('./models/Assignment');
 
-// Use node-fetch if needed
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// Using built-in fetch (available in Node.js 18+)
 
 // Import models
 const User = require('./models/User');
@@ -17,8 +16,6 @@ const app = express();
 const PORT = 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-console.log('Current working directory:', process.cwd());
-
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/alp_project', {
   useNewUrlParser: true,
@@ -26,8 +23,6 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/alp_project
 })
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
-
-console.log('MONGO_URI:', process.env.MONGO_URI);
 
 // ✅ Fix: Middleware must be before routes
 app.use(cors());
@@ -51,12 +46,20 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Middleware to check superadmin
+function requireSuperadmin(req, res, next) {
+  if (!req.user || req.user.role !== 'superadmin') {
+    return res.status(403).json({ error: 'Superadmin access required' });
+  }
+  next();
+}
+
 // Authentication endpoints
 app.post('/api/auth/register', async (req, res) => {
   try {
     console.log('🔵 Registration request received:', req.body);
     
-    const { name, email, password, role, therapistId } = req.body;
+    const { name, email, password, role, therapistId, subjects } = req.body;
 
     // Validation
     if (!name || !email || !password || !role) {
@@ -77,12 +80,24 @@ app.post('/api/auth/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Determine role for therapist
+    let finalRole = role;
+    if (role === 'therapist') {
+      const superadminExists = await User.exists({ role: 'superadmin' });
+      if (!superadminExists) {
+        finalRole = 'superadmin';
+      } else {
+        finalRole = 'pending_therapist';
+      }
+    }
+
     // Create new user
     const userData = {
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      role: role
+      role: finalRole,
+      subjects: subjects || []
     };
     if (role === 'student' && therapistId) {
       userData.therapistId = therapistId;
@@ -100,12 +115,13 @@ app.post('/api/auth/register', async (req, res) => {
     delete userResponse.password;
 
     res.status(201).json({ 
+      success: true,
       message: 'User created successfully',
       user: userResponse
     });
   } catch (error) {
     console.error('❌ Registration error:', error);
-    res.status(500).json({ error: 'Registration failed: ' + error.message });
+    res.status(500).json({ success: false, error: 'Registration failed: ' + error.message });
   }
 });
 
@@ -126,6 +142,11 @@ app.post('/api/auth/login', async (req, res) => {
     
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Block login for pending therapists
+    if (user.role === 'pending_therapist') {
+      return res.status(403).json({ error: 'Your therapist account is pending approval by the superadmin.' });
     }
 
     console.log('🔵 Found user:', { name: user.name, email: user.email, role: user.role });
@@ -155,13 +176,14 @@ app.post('/api/auth/login', async (req, res) => {
 
     console.log('✅ Login successful for:', user.email);
     res.json({
+      success: true,
       message: 'Login successful',
       token,
       user: userResponse
     });
   } catch (error) {
     console.error('❌ Login error:', error);
-    res.status(500).json({ error: 'Login failed: ' + error.message });
+    res.status(500).json({ success: false, error: 'Login failed: ' + error.message });
   }
 });
 
@@ -205,7 +227,6 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     // For now, we'll return it directly (for demo purposes)
     res.json({
       message: 'Password reset link sent to your email',
-      resetToken: resetToken, // Remove this in production
       userId: user._id
     });
   } catch (error) {
@@ -257,17 +278,19 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Performance tracking endpoints
 app.post('/api/performance', authenticateToken, async (req, res) => {
   try {
-    const { gameType, score, maxScore, accuracy, timeSpent, difficulty, emotions } = req.body;
+    const { gameType, score, moves, maxScore, accuracy, timeSpent, difficulty, emotions, emotionalState } = req.body;
 
     const performance = new Performance({
       studentId: req.user.userId,
       gameType,
       score,
+      moves,
       maxScore,
       accuracy,
       timeSpent,
       difficulty,
-      emotions
+      emotions,
+      emotionalState
     });
 
     await performance.save();
@@ -281,12 +304,13 @@ app.post('/api/performance', authenticateToken, async (req, res) => {
     }
 
     res.status(201).json({
+      success: true,
       message: 'Performance saved successfully',
       performance
     });
   } catch (error) {
     console.error('Performance save error:', error);
-    res.status(500).json({ error: 'Failed to save performance' });
+    res.status(500).json({ success: false, error: 'Failed to save performance' });
   }
 });
 
@@ -399,10 +423,12 @@ app.post('/api/assignments', async (req, res) => {
 // GET: Get assignments for a student
 app.get('/api/assignments/:studentId', async (req, res) => {
   try {
-    const assignments = await Assignment.find({ studentId: req.params.studentId });
+    const { studentId } = req.params;
+    const assignments = await Assignment.find({ studentId })
+      .sort({ updatedAt: -1, assignedAt: -1 }); // Most recent first
     res.json({ success: true, assignments });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'Failed to fetch assignments' });
   }
 });
 
@@ -441,6 +467,120 @@ app.patch('/api/assignments/:id', async (req, res) => {
   } catch (err) {
     console.error('❌ Error updating assignment:', err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get all performances for all students of the therapist
+app.get('/api/performances/all', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'therapist') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    // Find all students for this therapist
+    const students = await User.find({ therapistId: req.user.userId, role: 'student' }).select('_id name');
+    const studentIds = students.map(s => s._id);
+    // Fetch all performances for these students
+    const performances = await Performance.find({ studentId: { $in: studentIds } })
+      .sort({ completedAt: -1 });
+    res.json({ students, performances });
+  } catch (error) {
+    console.error('Performance fetch all error:', error);
+    res.status(500).json({ error: 'Failed to fetch all performances' });
+  }
+});
+
+// Update student subjects
+app.put('/api/student/subjects', authenticateToken, async (req, res) => {
+  try {
+    const { numberOfSubjects, subjects } = req.body;
+    const studentId = req.user.userId;
+    
+    const user = await User.findByIdAndUpdate(
+      studentId,
+      { 
+        numberOfSubjects,
+        subjects 
+      },
+      { new: true }
+    );
+    
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Assign path to student
+app.post('/api/student/assign-path', authenticateToken, async (req, res) => {
+  try {
+    const { studentId, path } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      studentId,
+      { assignedPath: path },
+      { new: true }
+    );
+    
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get student subjects and path
+app.get('/api/student/:studentId/subjects', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.studentId);
+    res.json({ 
+      success: true, 
+      numberOfSubjects: user.numberOfSubjects,
+      subjects: user.subjects,
+      assignedPath: user.assignedPath 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// List all pending therapists
+app.get('/api/pending-therapists', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const pending = await User.find({ role: 'pending_therapist' }).select('-password');
+    res.json({ pending });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch pending therapists' });
+  }
+});
+
+// Approve a pending therapist
+app.post('/api/approve-therapist', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'userId required' });
+    const user = await User.findById(userId);
+    if (!user || user.role !== 'pending_therapist') {
+      return res.status(404).json({ error: 'Pending therapist not found' });
+    }
+    user.role = 'therapist';
+    await user.save();
+    res.json({ message: 'Therapist approved', user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to approve therapist' });
+  }
+});
+
+// Reject (delete) a pending therapist
+app.delete('/api/pending-therapist/:userId', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user || user.role !== 'pending_therapist') {
+      return res.status(404).json({ error: 'Pending therapist not found' });
+    }
+    await user.deleteOne();
+    res.json({ message: 'Pending therapist rejected and deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reject therapist' });
   }
 });
 

@@ -15,9 +15,11 @@ const performanceSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  moves: {
+    type: Number
+  },
   maxScore: {
-    type: Number,
-    required: true
+    type: Number
   },
   accuracy: {
     type: Number,

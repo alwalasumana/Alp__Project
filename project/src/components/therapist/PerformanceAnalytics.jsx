@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, TrendingUp, Clock, Trophy, Heart, User, Calendar, Loader } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Trophy, Heart, User, Calendar, Loader, Brain, Sparkles } from 'lucide-react';
 import { useGame } from '../../contexts/GameContext';
 import { useAuth } from '../../contexts/AuthContext';
 import './PerformanceAnalytics.css';
@@ -13,7 +13,6 @@ const PerformanceAnalytics = () => {
   const [students, setStudents] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,29 +25,30 @@ const PerformanceAnalytics = () => {
     try {
       const studentsResult = await getStudents();
       if (!studentsResult.success) {
-        setError(studentsResult.error || 'Failed to fetch students');
         setLoading(false);
         return;
       }
       setStudents(studentsResult.students);
 
-      // Fetch all performances for all students
-      let allSessions = [];
-      for (const student of studentsResult.students) {
-        const perfResult = await getPerformance(student._id, null, 1000);
-        if (perfResult.success) {
-          // Attach studentId to each session for filtering
-          allSessions = allSessions.concat(
-            perfResult.performances.map(perf => ({
-              ...perf,
-              studentId: student._id
-            }))
-          );
-        }
-      }
+      // Fetch all performances for all students in parallel
+      const performancePromises = studentsResult.students.map(student =>
+        getPerformance(student._id, null, 1000).then(perfResult => ({
+          studentId: student._id,
+          performances: perfResult.success ? perfResult.performances : []
+        }))
+      );
+
+      const allResults = await Promise.all(performancePromises);
+
+      const allSessions = allResults.flatMap(result =>
+        result.performances.map(perf => ({
+          ...perf,
+          studentId: result.studentId
+        }))
+      );
+
       setSessions(allSessions);
     } catch (err) {
-      setError('Failed to fetch data');
       console.error('Error fetching analytics data:', err);
     } finally {
       setLoading(false);
@@ -79,8 +79,16 @@ const PerformanceAnalytics = () => {
 
   // Calculate analytics
   const totalSessions = filteredSessions.length;
+
+  // For Memory Match, use moves as the main metric
+  const memorySessions = filteredSessions.filter(session => session.gameType === 'memory' || session.gameId === 'memory-match');
+  const nonMemorySessions = filteredSessions.filter(session => !(session.gameType === 'memory' || session.gameId === 'memory-match'));
+
   const averageScore = totalSessions > 0 
-    ? Math.round(filteredSessions.reduce((sum, session) => sum + session.score, 0) / totalSessions)
+    ? Math.round(nonMemorySessions.reduce((sum, session) => sum + session.score, 0) / (nonMemorySessions.length || 1))
+    : 0;
+  const averageMoves = memorySessions.length > 0
+    ? Math.round(memorySessions.reduce((sum, session) => sum + (session.moves || session.score), 0) / memorySessions.length)
     : 0;
   const averageAccuracy = totalSessions > 0 
     ? Math.round(filteredSessions.reduce((sum, session) => sum + session.accuracy * 100, 0) / totalSessions)
@@ -103,46 +111,38 @@ const PerformanceAnalytics = () => {
   const gamePerformance = filteredSessions.reduce((acc, session) => {
     const game = getGameById(session.gameId);
     const gameName = game?.name || 'Activities:';
-    
     if (!acc[gameName]) {
       acc[gameName] = {
         sessions: 0,
         totalScore: 0,
+        totalMoves: 0,
         totalAccuracy: 0,
-        totalTime: 0
+        totalTime: 0,
+        isMemory: (session.gameType === 'memory' || session.gameId === 'memory-match')
       };
     }
-    
     acc[gameName].sessions += 1;
-    acc[gameName].totalScore += session.score;
+    if (acc[gameName].isMemory) {
+      acc[gameName].totalMoves += session.moves || session.score;
+    } else {
+      acc[gameName].totalScore += session.score;
+    }
     acc[gameName].totalAccuracy += session.accuracy * 100;
     acc[gameName].totalTime += session.timeSpent;
-    
     return acc;
   }, {});
 
   // Calculate averages for game performance
   Object.keys(gamePerformance).forEach(gameName => {
     const data = gamePerformance[gameName];
-    data.averageScore = Math.round(data.totalScore / data.sessions);
+    if (data.isMemory) {
+      data.averageMoves = Math.round(data.totalMoves / data.sessions);
+    } else {
+      data.averageScore = Math.round(data.totalScore / data.sessions);
+    }
     data.averageAccuracy = Math.round(data.totalAccuracy / data.sessions);
     data.averageTime = Math.round(data.totalTime / data.sessions / 60);
   });
-
-  const getEmotionalStateColor = (state) => {
-    switch (state) {
-      case 'happy':
-        return 'bg-green-100 text-green-800';
-      case 'excited':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'frustrated':
-        return 'bg-red-100 text-red-800';
-      case 'neutral':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const getEmotionalStateEmoji = (state) => {
     switch (state) {
@@ -201,30 +201,37 @@ const PerformanceAnalytics = () => {
       </button>
       <div className="performance-analytics-container">
         <div className="performance-analytics-header">
-          <h2 className="performance-analytics-title">Performance Analytics</h2>
-          <div className="performance-analytics-filters">
-            <select
-              value={selectedStudent}
-              onChange={(e) => setSelectedStudent(e.target.value)}
-              className="performance-analytics-select"
-            >
-              <option value="all">All Students</option>
-              {students.map((student) => (
-                <option key={student._id} value={student._id}>
-                  {student.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="performance-analytics-select"
-            >
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-              <option value="quarter">Last 3 Months</option>
-              <option value="all">All Time</option>
-            </select>
+          <div className="performance-analytics-header-left">
+            <h2 className="performance-analytics-title">Performance Analytics</h2>
+            <p className="performance-analytics-subtitle">
+              Analyze student performance and generate adaptive learning paths
+            </p>
+          </div>
+          <div className="performance-analytics-header-right">
+            <div className="performance-analytics-filters">
+              <select
+                value={selectedStudent}
+                onChange={(e) => setSelectedStudent(e.target.value)}
+                className="performance-analytics-select"
+              >
+                <option value="all">All Students</option>
+                {students.map((student) => (
+                  <option key={student._id} value={student._id}>
+                    {student.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="performance-analytics-select"
+              >
+                <option value="week">Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="quarter">Last 3 Months</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -293,10 +300,17 @@ const PerformanceAnalytics = () => {
                       <div className="performance-analytics-game-stat-value">{data.sessions}</div>
                       <div className="performance-analytics-game-stat-label">Sessions</div>
                     </div>
-                    <div className="performance-analytics-game-stat">
-                      <div className="performance-analytics-game-stat-value">{data.averageScore}%</div>
-                      <div className="performance-analytics-game-stat-label">Avg Score</div>
-                    </div>
+                    {data.isMemory ? (
+                      <div className="performance-analytics-game-stat">
+                        <div className="performance-analytics-game-stat-value">{data.averageMoves} moves</div>
+                        <div className="performance-analytics-game-stat-label">Avg Moves</div>
+                      </div>
+                    ) : (
+                      <div className="performance-analytics-game-stat">
+                        <div className="performance-analytics-game-stat-value">{data.averageScore}%</div>
+                        <div className="performance-analytics-game-stat-label">Avg Score</div>
+                      </div>
+                    )}
                     <div className="performance-analytics-game-stat">
                       <div className="performance-analytics-game-stat-value">{data.averageAccuracy}%</div>
                       <div className="performance-analytics-game-stat-label">Avg Accuracy</div>
@@ -325,8 +339,9 @@ const PerformanceAnalytics = () => {
                 .map((session) => {
                   const game = getGameById(session.gameId);
                   const student = students.find(s => s._id === session.studentId);
+                  const isMemory = session.gameType === 'memory' || session.gameId === 'memory-match';
                   return (
-                    <div key={session.id} className="performance-analytics-recent-card">
+                    <div key={session.id || session._id} className="performance-analytics-recent-card">
                       <div className="performance-analytics-recent-info">
                         <div className="performance-analytics-recent-game">
                           {getGameEmoji(session)}
@@ -338,8 +353,10 @@ const PerformanceAnalytics = () => {
                       </div>
                       <div className="performance-analytics-recent-stats">
                         <div className="performance-analytics-recent-stat">
-                          <div className="performance-analytics-recent-stat-value">{session.score}%</div>
-                          <div className="performance-analytics-recent-stat-label">Score</div>
+                          <div className="performance-analytics-recent-stat-value">
+                            {isMemory ? `${session.moves || session.score} moves` : `${session.score}%`}
+                          </div>
+                          <div className="performance-analytics-recent-stat-label">{isMemory ? 'Moves' : 'Score'}</div>
                         </div>
                         <div className="performance-analytics-recent-stat">
                           <div className="performance-analytics-recent-stat-value">{Math.round(session.timeSpent / 60)}m</div>

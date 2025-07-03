@@ -2,16 +2,11 @@ import React, { useRef, useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
 import './EmotionWebcam.css';
 import { FaceMesh } from '@mediapipe/face_mesh';
-import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const EmotionWebcam = ({ onEmotionChange }) => {
   const webcamRef = useRef(null);
   const [emotion, setEmotion] = useState('neutral');
   const faceMeshRef = useRef(null);
-  const { savePerformance } = useAuth();
-  const navigate = useNavigate();
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!faceMeshRef.current) {
@@ -37,7 +32,6 @@ const EmotionWebcam = ({ onEmotionChange }) => {
     faceMeshRef.current.onResults(async (results) => {
       if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
         let landmarks = results.multiFaceLandmarks[0].map(lm => [lm.x, lm.y, lm.z]);
-        window.lastLandmarks = landmarks;
         if (landmarks.length > 468) {
           console.warn('Received more than 468 landmarks, trimming to 468.');
           landmarks = landmarks.slice(0, 468);
@@ -72,21 +66,6 @@ const EmotionWebcam = ({ onEmotionChange }) => {
     const interval = setInterval(processFrame, 2000);
     return () => clearInterval(interval);
   }, [onEmotionChange]);
-
-  const handleGameComplete = async (result) => {
-    setSaving(true);
-    await savePerformance({
-      gameType: 'emotion',
-      score: result.score,
-      maxScore: result.maxScore,
-      accuracy: result.accuracy,
-      timeSpent: result.timeSpent,
-      difficulty: result.difficulty,
-      emotions: result.emotions
-    });
-    setSaving(false);
-    navigate('/dashboard/student');
-  };
 
   // Helper to get emoji for emotion
   const getEmotionEmoji = (emotion) => {

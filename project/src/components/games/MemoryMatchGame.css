@@ -36,59 +36,144 @@
   }
 }
 
+.memory-game-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 60px);
+  grid-template-rows: repeat(2, 60px);
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.memory-card {
+  width: 60px;
+  height: 60px;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  cursor: pointer;
+  border: 2px solid #e0e7ff;
+  transition: all 0.3s;
+  user-select: none;
+}
+
+.memory-card.flipped {
+  background: #fff;
+  color: #6366f1;
+  border: 2px solid #6366f1;
+}
+
+.memory-card.matched {
+  background: #a7f3d0;
+  color: #fff;
+}
+
+.memory-card.temp-flipped {
+  background: #fff;
+  color: #6366f1;
+  border: 2px solid #6366f1;
+  outline: 3px solid #6424fb;
+  outline-offset: 2px;
+}
+
+.memory-moves-display {
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.memory-completion-container {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.memory-completion-title {
+  font-size: 22px;
+  color: #059669;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.memory-completion-text {
+  margin-bottom: 16px;
+}
+
+.memory-score-display {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.memory-restart-btn {
+  padding: 10px 24px;
+  background: #6366f1;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.memory-restart-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+}
+
+.memory-submit-btn {
+  padding: 10px 24px;
+  background: #059669;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.memory-submit-btn:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-2px);
+}
+
+.memory-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.memory-submitted-message {
+  text-align: center;
+  margin-top: 24px;
+  color: #059669;
+  font-weight: 600;
+  font-size: 18px;
+}
+
 .memory-game-card h2 {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(90deg, #f7971e, #ffd200);
+  background: linear-gradient(90deg, #751ef7, #ffd200);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 18px;
   letter-spacing: 1px;
-}
-
-.memory-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 70px);
-  gap: 18px;
-  justify-content: center;
-  margin-bottom: 28px;
-}
-
-.memory-card {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #f7971e 60%, #ffd200 100%);
-  border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(247, 151, 30, 0.13);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #fff;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-  user-select: none;
-  position: relative;
-  border: 2.5px solid #fffbe7;
-  perspective: 600px;
-}
-.memory-card.flipped, .memory-card.matched {
-  background: linear-gradient(135deg, #43e97b 60%, #38f9d7 100%);
-  color: #fff;
-  transform: scale(1.08) rotateY(180deg);
-  box-shadow: 0 8px 32px rgba(67, 233, 123, 0.13);
-  border-color: #43e97b;
-}
-.memory-card.matched {
-  background: linear-gradient(135deg, #a18cd1 60%, #fbc2eb 100%);
-  color: #fff;
-  border-color: #a18cd1;
-  opacity: 0.7;
-}
-.memory-card:active {
-  transform: scale(0.97);
 }
 
 .memory-feedback {
@@ -191,90 +276,52 @@
   box-shadow: 0 8px 32px rgba(255, 107, 107, 0.25);
 }
 
-@media (max-width: 768px) {
-  .memory-game-card {
-    padding: 24px 10px;
-    margin: 10px;
-  }
-  .memory-game-card h2 {
-    font-size: 2rem;
-  }
-  .memory-grid {
-    grid-template-columns: repeat(4, 50px);
-    gap: 10px;
-  }
-  .memory-card {
-    width: 50px;
-    height: 50px;
-    font-size: 1.3rem;
-  }
-  .memory-end-buttons button {
-    width: 100%;
-    max-width: 220px;
-  }
-}
-
+/* Loading Animation */
 .memory-loading {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 200px;
   font-size: 1.2rem;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 1px;
+  color: white;
+  font-weight: 600;
 }
 
-/* --- Enhanced Responsive Styles --- */
 @media (max-width: 600px) {
-  .memory-match-container {
-    padding: 1rem 0.5rem;
-    width: 100vw;
-    min-width: 0;
+  .memory-game-card {
+    padding: 18px 6px 16px 6px;
+    border-radius: 18px;
+    max-width: 98vw;
   }
-  .memory-match-title {
+  .memory-game-title, .memory-game-card h2 {
     font-size: 1.2rem;
   }
-  .memory-match-board {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
+  .memory-grid {
+    grid-template-columns: repeat(4, 38px);
+    grid-template-rows: repeat(2, 38px);
+    gap: 8px;
   }
-  .memory-match-card {
-    width: 60px;
-    height: 60px;
-  }
-  .memory-match-footer {
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 0.95em;
-  }
-}
-
-/* --- Ultra-Mobile Responsive Styles --- */
-@media (max-width: 480px) {
-  .memory-match-title {
-    font-size: 1rem !important;
-  }
-  .memory-match-board {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.3rem !important;
+  .memory-card {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    border-radius: 7px;
   }
 }
 @media (max-width: 400px) {
-  .memory-match-title {
-    font-size: 0.9rem !important;
+  .memory-grid {
+    grid-template-columns: repeat(4, 28px);
+    grid-template-rows: repeat(2, 28px);
+    gap: 4px;
   }
-  .memory-match-card {
-    width: 40px !important;
-    height: 40px !important;
+  .memory-card {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+  .memory-game-title, .memory-game-card h2 {
+    font-size: 1rem;
   }
 }
-@media (max-width: 360px) {
-  .memory-match-title {
-    font-size: 0.8rem !important;
-  }
-  .memory-match-card {
-    width: 30px !important;
-    height: 30px !important;
-  }
-} 
+

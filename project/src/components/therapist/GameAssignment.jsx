@@ -14,7 +14,6 @@ const GameAssignment = () => {
   const [assignmentNotes, setAssignmentNotes] = useState('');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,11 +29,8 @@ const GameAssignment = () => {
       const result = await getStudents();
       if (result.success) {
         setStudents(result.students);
-      } else {
-        setError(result.error || 'Failed to fetch students');
       }
     } catch (err) {
-      setError('Failed to fetch students');
       console.error('Error fetching students:', err);
     } finally {
       setLoading(false);
@@ -54,15 +50,6 @@ const GameAssignment = () => {
     setSelectedGame('');
     setAssignmentNotes('');
     setShowAssignForm(false);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'assigned': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
   };
 
   const getStatusIcon = (status) => {

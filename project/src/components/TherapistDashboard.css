@@ -215,13 +215,49 @@
   height: 22px;
 }
 
-@media (max-width: 700px) {
-  .therapist-dashboard-header-inner, .therapist-dashboard-content {
+@media (max-width: 900px) {
+  .therapist-dashboard-header-inner,
+  .therapist-dashboard-content {
     padding: 1.1rem 0.5rem;
   }
   .therapist-dashboard-tabs-list {
     gap: 1.1rem;
     padding: 0 0.5rem;
+  }
+}
+@media (max-width: 700px) {
+  .therapist-dashboard-header-inner,
+  .therapist-dashboard-content {
+    padding: 0.7rem 0.2rem;
+  }
+  .therapist-dashboard-title {
+    font-size: 1.3rem;
+  }
+}
+@media (max-width: 480px) {
+  .therapist-dashboard-header-inner {
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: flex-start;
+    padding: 0.5rem 0.1rem;
+  }
+  .therapist-dashboard-title {
+    font-size: 1.1rem;
+  }
+  .therapist-dashboard-stat-card {
+    padding: 0.7rem 0.3rem;
+    border-radius: 0.7rem;
+  }
+  .therapist-dashboard-stat-value {
+    font-size: 1.1rem;
+  }
+  .therapist-dashboard-stat-title {
+    font-size: 0.9rem;
+  }
+  .therapist-dashboard-tabs-list {
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.2rem;
   }
 }
 
@@ -250,4 +286,46 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.pending-therapist-list-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5em;
+  margin-bottom: 1em;
+  background: #f3f4f6;
+  border-radius: 1em;
+  padding: 1em;
+}
+
+.pending-therapist-approve-btn {
+  background: #34d399;
+  color: white;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.5em 1.2em;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pending-therapist-approve-btn:hover {
+  background: #059669;
+}
+
+.pending-therapist-reject-btn {
+  background: #f87171;
+  color: white;
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.5em 1.2em;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pending-therapist-reject-btn:hover {
+  background: #dc2626;
+}
+
+.therapist-dashboard-refresh-btn {
+  margin-right: 1rem;
 } 

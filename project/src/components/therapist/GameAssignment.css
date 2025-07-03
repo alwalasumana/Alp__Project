@@ -380,65 +380,25 @@
   }
 }
 
-/* --- Enhanced Responsive Styles --- */
-@media (max-width: 600px) {
-  .game-assignment-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+@media (max-width: 700px) {
+  .game-assignment-modal {
+    max-width: 98vw;
     padding: 1rem 0.5rem;
   }
   .game-assignment-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
-  .game-assignment-list {
-    gap: 0.7rem;
+  .game-assignment-form label {
+    font-size: 0.95rem;
   }
-  .game-assignment-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.7rem;
-    padding: 1rem;
+}
+@media (max-width: 480px) {
+  .game-assignment-modal {
+    padding: 0.5rem 0.1rem;
+    border-radius: 0.7rem;
   }
-  .game-assignment-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  .game-assignment-card-info {
-    gap: 0.5rem;
-  }
-  .game-assignment-empty {
-    padding: 1.5rem 0.5rem;
+  .game-assignment-title {
     font-size: 1rem;
   }
 }
 
-/* --- Ultra-Mobile Responsive Styles --- */
-@media (max-width: 480px) {
-  .game-assignment-header {
-    padding: 0.5rem !important;
-  }
-  .game-assignment-title {
-    font-size: 1rem !important;
-  }
-  .game-assignment-card {
-    padding: 0.5rem !important;
-  }
-}
-@media (max-width: 400px) {
-  .game-assignment-title {
-    font-size: 0.9rem !important;
-  }
-  .game-assignment-card {
-    padding: 0.3rem !important;
-  }
-}
-@media (max-width: 360px) {
-  .game-assignment-title {
-    font-size: 0.8rem !important;
-  }
-  .game-assignment-card {
-    padding: 0.2rem !important;
-  }
-} 

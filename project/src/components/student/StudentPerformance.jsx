@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Clock, Trophy, Heart, Calendar, Loader, ArrowLeft } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Trophy, Heart, Loader, ArrowLeft } from 'lucide-react';
 import { useGame } from '../../contexts/GameContext';
 import { useAuth } from '../../contexts/AuthContext';
 import './StudentPerformance.css';

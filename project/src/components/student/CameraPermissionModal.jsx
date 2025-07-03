@@ -1,36 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import './CameraPermissionModal.css';
 
 const CameraPermissionModal = ({ onAllow, onDeny }) => (
-  <div style={{
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    background: 'rgba(0,0,0,0.4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  }}>
-    <div style={{
-      background: 'white',
-      borderRadius: '1.2rem',
-      padding: '2rem',
-      maxWidth: 350,
-      width: '90%',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
-    }}>
-      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem' }}>Camera Permission</h2>
-      <p style={{ marginBottom: '1.5rem', color: '#444' }}>
+  <div className="camera-permission-modal">
+    <div className="camera-permission-content">
+      <h2 className="camera-permission-title">Camera Permission</h2>
+      <p className="camera-permission-text">
         This game requires access to your camera. Do you want to allow camera access?
       </p>
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-        <button onClick={onDeny} style={{ padding: '0.6rem 1.2rem', borderRadius: '0.7rem', border: 'none', background: '#e5e7eb', color: '#374151', fontWeight: 600, cursor: 'pointer' }}>Deny</button>
-        <button onClick={onAllow} style={{ padding: '0.6rem 1.2rem', borderRadius: '0.7rem', border: 'none', background: '#6366f1', color: 'white', fontWeight: 600, cursor: 'pointer' }}>Allow</button>
+      <div className="camera-permission-buttons">
+        <button onClick={onDeny} className="camera-permission-deny-btn">Deny</button>
+        <button onClick={onAllow} className="camera-permission-allow-btn">Allow</button>
       </div>
     </div>
   </div>
 );
 
-export default CameraPermissionModal; 
+const ParentComponent = () => {
+  const [showCameraModal, setShowCameraModal] = useState(false);
+
+  useEffect(() => {
+    // Try to access the camera on mount
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        // Camera is available and permission granted
+        setShowCameraModal(false);
+        // You may want to stop the stream if you only want to check permission
+        stream.getTracks().forEach(track => track.stop());
+      })
+      .catch((err) => {
+        // Permission denied or camera not available
+        setShowCameraModal(true);
+      });
+  }, []);
+
+  const handleAllow = () => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        setShowCameraModal(false);
+        stream.getTracks().forEach(track => track.stop());
+      })
+      .catch(() => {
+        setShowCameraModal(true);
+      });
+  };
+
+  const handleDeny = () => {
+    setShowCameraModal(false);
+    // Optionally, handle denial (e.g., show a message or redirect)
+  };
+
+  return (
+    <div>
+      {/* Your main content here */}
+      {showCameraModal && (
+        <CameraPermissionModal onAllow={handleAllow} onDeny={handleDeny} />
+      )}
+    </div>
+  );
+};
+
+export default ParentComponent; 

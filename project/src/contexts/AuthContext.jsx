@@ -110,22 +110,11 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        // Update user's total points and level
-        if (data.performance) {
-          setUser(prevUser => ({
-            ...prevUser,
-            totalPoints: prevUser.totalPoints + performanceData.score,
-            level: Math.floor((prevUser.totalPoints + performanceData.score) / 1000) + 1
-          }));
-        }
-        return { success: true, data };
+        return { success: true, data: await response.json() };
       } else {
-        const errorData = await response.json();
-        return { success: false, error: errorData.error };
+        return { success: false, error: (await response.json()).error };
       }
     } catch (error) {
-      console.error('Performance save error:', error);
       return { success: false, error: 'Failed to save performance' };
     }
   };

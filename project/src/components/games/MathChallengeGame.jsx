@@ -35,7 +35,7 @@ function getLevelFromLastThreeEmotions(emotions) {
 
 const MathChallengeGame = () => {
   const { user, savePerformance } = useAuth();
-  const { addGameSession, completeAssignment } = useGame();
+  const { completeAssignment } = useGame();
   const [questions, setQuestions] = useState({ easy: [], medium: [], hard: [] });
   const [currentPool, setCurrentPool] = useState([]);
   const [usedIndices, setUsedIndices] = useState([]);
@@ -47,7 +47,6 @@ const MathChallengeGame = () => {
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [questionNumber, setQuestionNumber] = useState(1);
-  const [emotion, setEmotion] = useState('neutral');
   const [submitted, setSubmitted] = useState(false);
   const emotionHistory = useRef([]);
   const navigate = useNavigate();
@@ -96,18 +95,8 @@ const MathChallengeGame = () => {
   };
 
   const handleEmotionChange = (newEmotion) => {
-    setEmotion(newEmotion);
     emotionHistory.current.push(typeof newEmotion === 'string' ? newEmotion : newEmotion.emotion);
   };
-
-  function getLevelFromEmotions(emotions) {
-    const freq = {};
-    emotions.forEach(e => { freq[e] = (freq[e] || 0) + 1; });
-    const mostFrequent = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b))[0];
-    if (mostFrequent === 'happy' || mostFrequent === 'surprised') return 'hard';
-    if (['sad', 'fear', 'disgust', 'angry'].includes(mostFrequent)) return 'easy';
-    return 'medium';
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -165,22 +154,12 @@ const MathChallengeGame = () => {
     if (!user) return;
     setSaving(true);
     try {
-      console.log('Emotion history for this session:', emotionHistory.current);
       const mostFrequentEmotion = getMostFrequentEmotion(
         emotionHistory.current.map(e => typeof e === 'string' ? e : e.emotion)
       );
       const timeSpent = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
-      await addGameSession({
-        studentId: user.id,
-        gameId: 'math-challenge',
-        score: score,
-        accuracy: score / TOTAL_QUESTIONS,
-        timeSpent,
-        emotionalState: mostFrequentEmotion,
-        completedAt: new Date().toISOString(),
-        mistakes: TOTAL_QUESTIONS - score,
-        hintsUsed: 0
-      });
+      
+      // Save performance data
       await savePerformance({
         gameType: 'math',
         score: score,
@@ -195,14 +174,20 @@ const MathChallengeGame = () => {
         })),
         emotionalState: mostFrequentEmotion
       });
-      // Mark assignment as completed!
+      
+      // Mark assignment as completed
       if (assignmentId) {
-        console.log('🔵 MathChallengeGame: About to complete assignment:', assignmentId);
-        await completeAssignment(assignmentId);
-        console.log('✅ MathChallengeGame: Assignment marked as completed:', assignmentId);
+        try {
+          await completeAssignment(assignmentId);
+          console.log('✅ MathChallengeGame: Assignment marked as completed:', assignmentId);
+        } catch (assignmentError) {
+          console.error('❌ Error completing assignment:', assignmentError);
+          // Continue with submission even if assignment completion fails
+        }
       } else {
         console.log('⚠️ MathChallengeGame: No assignmentId found');
       }
+      
       setSubmitted(true);
       setSaving(false);
       setTimeout(() => {
@@ -212,14 +197,6 @@ const MathChallengeGame = () => {
       console.error('Error saving game result:', error);
       setSaving(false);
       alert('Failed to save result. Please try again.');
-    }
-  };
-
-  const handleGameFinish = async () => {
-    if (assignmentId) {
-      await completeAssignment(assignmentId);
-      console.log('Assignment marked as completed:', assignmentId);
-      navigate('/dashboard/student');
     }
   };
 

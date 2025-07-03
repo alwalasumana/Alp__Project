@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const AssignmentSchema = new mongoose.Schema({
-  studentId: { type: String, required: true },
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   gameId: { type: String, required: true },
-  assignedBy: { type: String, required: true },
+  assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   notes: { type: String },
   assignedAt: { type: Date, default: Date.now },
   status: { type: String, default: 'assigned' }

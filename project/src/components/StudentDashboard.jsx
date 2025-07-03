@@ -18,12 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import CameraPermissionModal from './student/CameraPermissionModal';
 import './StudentDashboard.css';
 
-const ALL_GAMES = [
-  { id: 'memory-match', name: 'Memory Match', description: 'Match pairs of cards to improve memory and concentration', category: 'memory', difficulty: 'medium', icon: 'Brain', color: 'bg-purple-500', estimatedTime: 10 },
-  { id: 'math-challenge', name: 'Math Challenge', description: 'Solve math problems to build numerical skills', category: 'math', difficulty: 'easy', icon: 'Calculator', color: 'bg-green-500', estimatedTime: 15 },
-  { id: 'pattern-recognition', name: 'Pattern Recognition', description: 'Identify and complete patterns to enhance logical thinking', category: 'pattern', difficulty: 'hard', icon: 'Puzzle', color: 'bg-blue-500', estimatedTime: 12 }
-];
-
 const StudentDashboard = () => {
   const { user, logout, getPerformance } = useAuth();
   const { games, getStudentAssignments, getGameById, assignments } = useGame();
@@ -36,6 +30,8 @@ const StudentDashboard = () => {
   const [showCameraModal, setShowCameraModal] = useState(false);
   const [pendingGame, setPendingGame] = useState(null);
   const pollingRef = useRef();
+  const [assignedPath, setAssignedPath] = useState([]);
+  const [showPath, setShowPath] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -61,9 +57,26 @@ const StudentDashboard = () => {
     }
   };
 
+  const fetchAssignedPath = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/student/${user._id}/subjects`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAssignedPath(data.assignedPath || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch assigned path');
+    }
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchData();
+    await fetchAssignedPath();
     setRefreshing(false);
   };
 
@@ -74,6 +87,7 @@ const StudentDashboard = () => {
         if (!user?._id) return;
         setLoading(true);
         await fetchData();
+        await fetchAssignedPath();
       } catch (err) {
         console.error('Error loading dashboard:', err);
       } finally {
@@ -82,9 +96,12 @@ const StudentDashboard = () => {
     };
     loadData();
 
-    // Poll every 10 seconds for new assignments
+    // Poll every 10 seconds for new assignments and assigned path
     pollingRef.current = setInterval(() => {
-      if (user?._id) fetchData();
+      if (user?._id) {
+        fetchData();
+        fetchAssignedPath();
+      }
     }, 10000);
 
     return () => {
@@ -146,14 +163,7 @@ const StudentDashboard = () => {
   if (loading) {
     return (
       <div className="student-dashboard-bg">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          flexDirection: 'column',
-          gap: '1rem'
-        }}>
+        <div className="loading-spinner-container">
           <div className="loading-spinner"></div>
           <p>Loading your dashboard...</p>
         </div>
@@ -184,17 +194,21 @@ const StudentDashboard = () => {
           </div>
           <div className="student-dashboard-header-right">
             <button
+              className="student-dashboard-toggle-path-btn dashboard-header-btn"
+              onClick={() => setShowPath(v => !v)}
+            >
+              {showPath ? 'Hide Learning Path' : 'Learning Path'}
+            </button>
+            <button
               onClick={() => setShowPerformance(true)}
-              className="student-dashboard-performance-btn"
-              style={{ marginRight: '1rem' }}
+              className="student-dashboard-performance-btn dashboard-header-btn"
             >
               <BarChart3 className="w-4 h-4" />
               <span>View Performance</span>
             </button>
             <button
               onClick={handleRefresh}
-              className="student-dashboard-refresh"
-              style={{ marginRight: '1rem' }}
+              className="student-dashboard-refresh dashboard-header-btn"
               disabled={refreshing}
             >
               {refreshing ? 'Refreshing...' : '🔄 Refresh'}
@@ -253,20 +267,15 @@ const StudentDashboard = () => {
 
         {/* Assigned Games */}
         <div className="student-dashboard-assigned-games">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div className="assigned-games-header">
             <h2 className="student-dashboard-section-title">Available Games</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em', color: '#6b7280', fontSize: '0.98em' }}>
+            <div className="assigned-games-info">
               <Clock className="w-4 h-4" />
               <span>Ready to play</span>
             </div>
           </div>
           {assignments && assignments.filter(a => a.status !== 'completed' && a.status !== 'inactive').length > 0 ? (
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1.5rem',
-              justifyContent: 'flex-start'
-            }}>
+            <div className="assigned-games-list">
               {assignments
                 .filter(a => a.status !== 'completed' && a.status !== 'inactive')
                 .map(a => {
@@ -283,8 +292,8 @@ const StudentDashboard = () => {
             </div>
           ) : (
             <div className="student-dashboard-no-games">
-              <GameController2 className="w-16 h-16" style={{ color: '#a1a1aa', margin: '0 auto 1rem' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>No Games Assigned</h3>
+              <GameController2 className="w-16 h-16 no-games-icon" />
+              <h3 className="no-games-title">No Games Assigned</h3>
               <p>Games will appear here once your therapist assigns them.</p>
             </div>
           )}
@@ -301,8 +310,8 @@ const StudentDashboard = () => {
                 const game = games.find(g => g.id === session.gameType);
                 return (
                   <div key={session._id || session.id} className="student-dashboard-recent-session">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div className="icon" style={{ background: game?.color || '#a78bfa' }}>
+                    <div className="recent-session-row">
+                      <div className="icon recent-session-icon" style={{ background: game?.color || '#a78bfa' }}>
                         <GameController2 className="w-5 h-5" />
                       </div>
                       <div>
@@ -312,7 +321,7 @@ const StudentDashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.2em' }}>
+                    <div className="recent-session-stats">
                       <div style={{ textAlign: 'right' }}>
                         <p className="student-dashboard-recent-session-score">{session.score}%</p>
                         <p className="student-dashboard-recent-session-time">{Math.round(session.timeSpent / 60)}min</p>
@@ -334,12 +343,35 @@ const StudentDashboard = () => {
                 );
               })
             ) : (
-              <div style={{ color: '#6b7280', textAlign: 'center', padding: '1.5rem 0' }}>
+              <div className="recent-activity-empty">
                 No recent activity yet.
               </div>
             )}
           </div>
         </div>
+
+        {/* Assigned Path */}
+        {showPath && (
+          <>
+            <div className="learning-path-modal-overlay"></div>
+            <div className="learning-path-top-card">
+              <button className="learning-path-top-card-close" onClick={() => setShowPath(false)}>&times;</button>
+              <h3>Your Learning Path</h3>
+              {assignedPath.length > 0 ? (
+                assignedPath.map((item, index) => (
+                  <div key={index} className="path-item">
+                    <span className="path-badge">{item.order}</span>
+                    <span>{item.subjectName}</span>
+                    <span>Difficulty: {item.difficulty}</span>
+                    {item.notes && <span>Notes: {item.notes}</span>}
+                  </div>
+                ))
+              ) : (
+                <div className="learning-path-empty">No learning path assigned yet.</div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -7,11 +7,13 @@ import {
   Calendar,
   TrendingUp,
   Loader,
+  Brain,
 } from 'lucide-react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useGame } from '../contexts/GameContext';
 import './TherapistDashboard.css';
+import axios from 'axios';
 
 const TherapistDashboard = () => {
   const { user, logout, getStudents, getPerformance } = useAuth();
@@ -24,7 +26,11 @@ const TherapistDashboard = () => {
     avgPerformance: 0
   });
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [pendingPathAssignments, setPendingPathAssignments] = useState([]);
+  const [pendingTherapists, setPendingTherapists] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
 
   const fetchDashboardStats = useCallback(async () => {
     try {
@@ -39,8 +45,11 @@ const TherapistDashboard = () => {
       let totalScore = 0;
       
       if (studentsResult.success) {
-        for (const student of studentsResult.students) {
-          const performanceResult = await getPerformance(student._id);
+        // Fetch all performances in parallel for speed
+        const performanceResults = await Promise.all(
+          studentsResult.students.map(student => getPerformance(student._id))
+        );
+        for (const performanceResult of performanceResults) {
           if (performanceResult.success) {
             totalSessions += performanceResult.performances.length;
             totalScore += performanceResult.performances.reduce((sum, perf) => sum + perf.score, 0);
@@ -62,7 +71,7 @@ const TherapistDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [getStudents, getPerformance, assignments]);
+  }, [getStudents, getPerformance]);
 
   const refreshDashboard = async () => {
     setRefreshing(true);
@@ -88,8 +97,69 @@ const TherapistDashboard = () => {
   }, [getAllAssignments]);
 
   useEffect(() => {
-    fetchDashboardStats();
+    const load = async () => {
+      await fetchDashboardStats();
+      setInitialLoading(false);
+    };
+    load();
   }, [fetchDashboardStats]);
+
+  const checkPendingPathAssignments = async () => {
+    try {
+      // This would fetch from your notifications or game completion data
+      // For now, we'll simulate it
+      const students = await getStudents();
+      if (students.success) {
+        // Check which students have completed games recently
+        // and might need path assignments
+        console.log('Checking for students who need path assignments...');
+      }
+    } catch (error) {
+      console.error('Error checking pending assignments:', error);
+    }
+  };
+
+  useEffect(() => {
+    checkPendingPathAssignments();
+  }, []);
+
+  // Fetch pending therapists if superadmin
+  const fetchPendingTherapists = useCallback(async () => {
+    if (user?.role !== 'superadmin') return;
+    setPendingLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/pending-therapists', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPendingTherapists(res.data.pending || []);
+    } catch (err) {
+      setPendingTherapists([]);
+    } finally {
+      setPendingLoading(false);
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    if (user?.role === 'superadmin') {
+      fetchPendingTherapists();
+    }
+  }, [user?.role, fetchPendingTherapists]);
+
+  const handleApprove = async (id) => {
+    const token = localStorage.getItem('token');
+    await axios.post('/api/approve-therapist', { userId: id }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchPendingTherapists();
+  };
+  const handleReject = async (id) => {
+    const token = localStorage.getItem('token');
+    await axios.delete(`/api/pending-therapist/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchPendingTherapists();
+  };
 
   const tabs = [
     { path: 'students', icon: Users, label: 'Students' },
@@ -99,6 +169,27 @@ const TherapistDashboard = () => {
 
   return (
     <div className="therapist-dashboard-bg">
+      {/* Superadmin: Pending Therapists Approval */}
+      {user?.role === 'superadmin' && (
+        <div className="pending-therapists-approval">
+          <h2>Pending Therapist Approvals</h2>
+          {pendingLoading ? (
+            <p>Loading pending therapists...</p>
+          ) : pendingTherapists.length === 0 ? (
+            <p>No pending therapist requests.</p>
+          ) : (
+            <ul>
+              {pendingTherapists.map(pt => (
+                <li key={pt._id} className="pending-therapist-list-item">
+                  <span><b>{pt.name}</b> ({pt.email})</span>
+                  <button onClick={() => handleApprove(pt._id)} className="pending-therapist-approve-btn">Approve</button>
+                  <button onClick={() => handleReject(pt._id)} className="pending-therapist-reject-btn">Reject</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {/* Header */}
       <div className="therapist-dashboard-header">
         <div className="therapist-dashboard-header-inner">
@@ -114,8 +205,7 @@ const TherapistDashboard = () => {
           <div className="therapist-dashboard-header-right">
             <button
               onClick={refreshDashboard}
-              className="student-dashboard-refresh"
-              style={{ marginRight: '1rem' }}
+              className="student-dashboard-refresh therapist-dashboard-refresh-btn"
               disabled={refreshing}
             >
               {refreshing ? 'Refreshing...' : '🔄 Refresh'}
@@ -137,7 +227,7 @@ const TherapistDashboard = () => {
       <div className="therapist-dashboard-content">
         {/* Stats Cards */}
         <div className="therapist-dashboard-stats">
-          {loading ? (
+          {initialLoading ? (
             <div className="therapist-dashboard-loading">
               <Loader className="therapist-dashboard-loading-icon" />
               <p>Loading dashboard...</p>

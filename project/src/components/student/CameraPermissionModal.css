@@ -1,0 +1,71 @@
+/* Camera Permission Modal Styles */
+.camera-permission-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.camera-permission-content {
+  background: white;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  max-width: 350px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.camera-permission-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.camera-permission-text {
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+
+.camera-permission-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.camera-permission-deny-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.7rem;
+  border: none;
+  background: #e5e7eb;
+  color: #374151;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.camera-permission-deny-btn:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.camera-permission-allow-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.7rem;
+  border: none;
+  background: #6366f1;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.camera-permission-allow-btn:hover {
+  background: #5855eb;
+  transform: translateY(-1px);
+} 

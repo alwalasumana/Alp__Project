@@ -40,43 +40,29 @@
   background: #f3f4f6;
 }
 
-/* --- Enhanced Responsive Styles --- */
 @media (max-width: 600px) {
   .emotion-webcam-container {
-    padding: 1rem 0.5rem;
-    width: 100vw;
-    min-width: 0;
+    bottom: 8px;
+    right: 8px;
   }
-  .emotion-webcam-title {
+  .emotion-webcam-video {
+    width: 140px;
+    height: 100px;
+  }
+  .emotion-display {
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+  .emotion-text {
     font-size: 1.2rem;
-  }
-  .emotion-webcam-video {
-    width: 100%;
-    max-width: 320px;
-    height: auto;
-  }
-  .emotion-webcam-controls {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-/* --- Ultra-Mobile Responsive Styles --- */
-@media (max-width: 480px) {
-  .emotion-webcam-title {
-    font-size: 1rem !important;
-  }
-  .emotion-webcam-video {
-    max-width: 200px !important;
   }
 }
 @media (max-width: 400px) {
-  .emotion-webcam-title {
-    font-size: 0.9rem !important;
+  .emotion-webcam-video {
+    width: 100px;
+    height: 70px;
   }
-}
-@media (max-width: 360px) {
-  .emotion-webcam-title {
-    font-size: 0.8rem !important;
+  .emotion-text {
+    font-size: 1rem;
   }
 }

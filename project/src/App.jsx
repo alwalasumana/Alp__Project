@@ -17,6 +17,7 @@ import GameAssignment from './components/therapist/GameAssignment.jsx';
 import PerformanceAnalytics from './components/therapist/PerformanceAnalytics.jsx';
 import StudentManagement from './components/therapist/StudentManagement.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
+import SuperadminDashboard from './components/SuperadminDashboard.jsx';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -52,6 +53,7 @@ function AppRoutes() {
       <Route path="/dashboard/therapist/assignments" element={<GameAssignment />} />
       <Route path="/dashboard/therapist/analytics" element={<PerformanceAnalytics />} />
       <Route path="/dashboard/therapist/students" element={<StudentManagement />} />
+      <Route path="/dashboard/superadmin" element={<SuperadminDashboard />} />
       {/* Add more routes as needed */}
     </Routes>
   );

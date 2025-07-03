@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { User, Calendar, Trophy, TrendingUp, Mail, Phone, Loader } from 'lucide-react';
+import { User, Calendar, Trophy, TrendingUp, Mail, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGame } from '../../contexts/GameContext';
 import './StudentManagement.css';
+import PathAssignment from './PathAssignment';
 
 const StudentManagement = () => {
   const { user, getStudents, getPerformance } = useAuth();
-  const { getStudentSessions, getStudentAssignments } = useGame();
+  const { getStudentAssignments } = useGame();
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,35 +35,6 @@ const StudentManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getStudentProgress = async (studentId) => {
-    try {
-      const result = await getPerformance(studentId);
-      if (result.success) {
-        const performances = result.performances;
-        const totalSessions = performances.length;
-        const averageScore = totalSessions > 0 
-          ? Math.round(performances.reduce((sum, perf) => sum + perf.score, 0) / totalSessions)
-          : 0;
-        
-        return {
-          totalSessions,
-          averageScore,
-          completedAssignments: 0, // Will be updated when assignments are implemented
-          activeAssignments: 0
-        };
-      }
-    } catch (err) {
-      console.error('Error fetching student progress:', err);
-    }
-    
-    return {
-      totalSessions: 0,
-      averageScore: 0,
-      completedAssignments: 0,
-      activeAssignments: 0
-    };
   };
 
   if (loading) {
@@ -105,6 +77,7 @@ const StudentManagement = () => {
             {students.map((student) => (
               <StudentCard key={student._id} student={student} navigate={navigate}
                 onEditPath={() => { setSelectedStudent(student); setShowPathBuilder(true); }}
+                onPathAssigned={() => { setShowPathBuilder(false); fetchStudents(); }}
               />
             ))}
           </div>
@@ -123,16 +96,28 @@ const StudentManagement = () => {
             Back to Dashboard
           </button>
         </div>
+        {showPathBuilder && selectedStudent && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <PathAssignment
+                studentId={selectedStudent._id}
+                onPathAssigned={() => setShowPathBuilder(false)}
+              />
+              <button className="modal-close-btn" onClick={() => setShowPathBuilder(false)}>&times;</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-const StudentCard = ({ student, navigate, onEditPath }) => {
+const StudentCard = ({ student, navigate, onEditPath, onPathAssigned }) => {
   const [progress, setProgress] = useState({
     totalSessions: 0,
     averageScore: 0,
-    activeAssignments: 0
+    activeAssignments: 0,
+    allAssignmentsCompleted: true
   });
   const [loading, setLoading] = useState(true);
   const { getPerformance } = useAuth();
@@ -157,17 +142,22 @@ const StudentCard = ({ student, navigate, onEditPath }) => {
 
       // Fetch assignments
       let activeAssignments = 0;
+      let allAssignmentsCompleted = true;
       if (getStudentAssignments) {
         const assignments = await getStudentAssignments(student._id);
-        if (Array.isArray(assignments)) {
+        if (Array.isArray(assignments) && assignments.length > 0) {
           activeAssignments = assignments.filter(a => a.status !== 'completed').length;
+          allAssignmentsCompleted = assignments.every(a => a.status === 'completed');
+        } else {
+          allAssignmentsCompleted = false; // No assignments means not completed
         }
       }
 
       setProgress({
         totalSessions,
         averageScore,
-        activeAssignments
+        activeAssignments,
+        allAssignmentsCompleted
       });
     } catch (err) {
       console.error('Error fetching student progress:', err);
@@ -220,14 +210,54 @@ const StudentCard = ({ student, navigate, onEditPath }) => {
           <span>Joined: {new Date(student.joinDate).toLocaleDateString()}</span>
         </div>
       </div>
+      {student.subjects && student.subjects.length > 0 && (
+        <div className="student-card-subjects">
+          <h4 className="student-card-subjects-heading">Subjects:</h4>
+          <ul className="student-card-subjects-list">
+            {student.subjects.map((subj, idx) => (
+              <li key={idx}>
+                {subj.name} (Interest: {subj.interest}, Difficulty: {subj.difficulty})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="student-card-actions">
         <button 
           className="student-card-action-btn student-card-action-btn-blue"
           onClick={() => navigate(`/dashboard/therapist/assignments?student=${student._id}`)}
+          disabled={progress.activeAssignments > 0}
+          title={progress.activeAssignments > 0 ? 'Student must finish the current game before assigning a new one.' : ''}
         >
           Assign Game
         </button>
+        {progress.allAssignmentsCompleted ? (
+          <button
+            className="student-card-action-btn student-card-action-btn-gradient"
+            onClick={onEditPath}
+          >
+            Assign Path
+          </button>
+        ) : (
+          <button
+            className="student-card-action-btn student-card-action-btn-gradient"
+            disabled
+            title="Student must complete all assigned games before assigning a learning path."
+          >
+            Waiting for game completion
+          </button>
+        )}
       </div>
+      {progress.activeAssignments > 0 && (
+        <div className="student-card-hint student-card-hint-purple">
+          Student must finish the current game before assigning a new one.
+        </div>
+      )}
+      {!progress.allAssignmentsCompleted && progress.activeAssignments === 0 && (
+        <div className="student-card-hint student-card-hint-yellow">
+          No games assigned yet. Assign a game first.
+        </div>
+      )}
     </div>
   );
 };

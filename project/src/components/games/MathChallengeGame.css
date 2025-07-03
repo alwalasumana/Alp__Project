@@ -300,33 +300,6 @@
   border: 2px solid #00b894;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .game-card {
-    padding: 30px 20px;
-    margin: 10px;
-  }
-  
-  .game-title {
-    font-size: 2rem;
-  }
-  
-  .question-text {
-    font-size: 1.5rem;
-    padding: 15px;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .action-buttons button {
-    width: 100%;
-    max-width: 200px;
-  }
-}
-
 /* Loading Animation */
 .loading {
   display: flex;
@@ -338,55 +311,37 @@
   font-weight: 600;
 }
 
-/* --- Enhanced Responsive Styles --- */
 @media (max-width: 600px) {
   .math-game-container {
-    padding: 1rem 0.5rem;
-    width: 100vw;
-    min-width: 0;
+    padding: 8px;
   }
-  .game-title {
-    font-size: 1.2rem;
+  .game-card {
+    padding: 18px 8px;
+    border-radius: 18px;
+    max-width: 98vw;
+  }
+  .game-title, .completion-title {
+    font-size: 1.3rem;
   }
   .question-text {
     font-size: 1.1rem;
-    padding: 0.7rem;
+    padding: 10px;
   }
-  .action-buttons {
-    flex-direction: column;
-    align-items: center;
+  .answer-input {
+    font-size: 1rem;
+    padding: 8px 10px;
   }
-  .action-buttons button {
-    width: 100%;
-    max-width: 200px;
-  }
-}
-
-/* --- Ultra-Mobile Responsive Styles --- */
-@media (max-width: 480px) {
-  .math-challenge-title {
-    font-size: 1rem !important;
-  }
-  .math-challenge-board {
-    grid-template-columns: 1fr !important;
-    gap: 0.3rem !important;
+  .submit-button, .next-button {
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    border-radius: 14px;
   }
 }
 @media (max-width: 400px) {
-  .math-challenge-title {
-    font-size: 0.9rem !important;
+  .game-title, .completion-title {
+    font-size: 1rem;
   }
-  .math-challenge-question {
-    font-size: 0.9rem !important;
-    padding: 0.3rem !important;
-  }
-}
-@media (max-width: 360px) {
-  .math-challenge-title {
-    font-size: 0.8rem !important;
-  }
-  .math-challenge-question {
-    font-size: 0.8rem !important;
-    padding: 0.2rem !important;
+  .game-card {
+    padding: 8px 2px;
   }
 } 

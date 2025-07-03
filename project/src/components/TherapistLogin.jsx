@@ -24,7 +24,11 @@ const TherapistLogin = () => {
       const data = await response.json();
       if (response.ok && data.user && data.token) {
         login(data.user, data.token);
-        navigate('/dashboard/therapist');
+        if (data.user.role === 'superadmin') {
+          navigate('/dashboard/superadmin');
+        } else {
+          navigate('/dashboard/therapist');
+        }
       } else {
         setError(data.error || 'Invalid email or password');
       }

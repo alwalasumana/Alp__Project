@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Clock, Star } from 'lucide-react';
+import { Play, Clock } from 'lucide-react';
 
 const GameCard = ({ game, onClick }) => {
   if (!game) return null; // Defensive check to prevent errors
@@ -11,28 +11,20 @@ const GameCard = ({ game, onClick }) => {
   };
 
   return (
-    <div 
-      onClick={onClick}
-      className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-    >
-      <div className={`h-32 ${game.color} flex items-center justify-center relative`}>
-        <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
-          <Play className="w-8 h-8 text-white" />
+    <div onClick={onClick} className="game-card creative-game-card">
+      <div className="game-card-header creative-gradient-bg">
+        <div className="game-card-icon creative-glow">
+          <Play className="w-8 h-8" />
         </div>
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[game.difficulty]}`}>
-          {game.difficulty}
-        </div>
+        <div className="game-card-badge creative-badge">Adaptive</div>
       </div>
-      
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">{game.name}</h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{game.description}</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
-            <Clock className="w-4 h-4" />
-            <span>{game.estimatedTime} min</span>
-          </div>
+      <div className="game-card-body">
+        <h3 className="game-card-title creative-title">{game.name}</h3>
+        <p className="game-card-desc creative-desc">{game.description}</p>
+        <div className="creative-divider"></div>
+        <div className="game-card-footer creative-footer">
+          <Clock className="w-4 h-4" />
+          <span>{game.estimatedTime} min</span>
         </div>
       </div>
     </div>
