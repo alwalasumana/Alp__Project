@@ -7,7 +7,6 @@ import StudentLogin from './components/StudentLogin.jsx';
 import TherapistLogin from './components/TherapistLogin.jsx';
 import StudentRegister from './components/StudentRegister.jsx';
 import TherapistRegister from './components/TherapistRegister.jsx';
-import ForgotPassword from './components/ForgotPassword.jsx';
 import TherapistDashboard from './components/TherapistDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import MathChallengeGame from './components/games/MathChallengeGame.jsx';
@@ -29,8 +28,6 @@ function AppRoutes() {
       <Route path="/login/therapist" element={<TherapistLogin />} />
       <Route path="/register/student" element={<StudentRegister />} />
       <Route path="/register/therapist" element={<TherapistRegister />} />
-      <Route path="/forgot-password/student" element={<ForgotPassword userType="student" />} />
-      <Route path="/forgot-password/therapist" element={<ForgotPassword userType="therapist" />} />
       <Route
         path="/dashboard/student"
         element={

@@ -168,51 +168,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const forgotPassword = async (email) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        return { success: true, message: data.message, resetToken: data.resetToken };
-      } else {
-        return { success: false, message: data.error };
-      }
-    } catch (error) {
-      console.error('Forgot password error:', error);
-      return { success: false, message: 'Failed to process forgot password request' };
-    }
-  };
-
-  const resetPassword = async (resetToken, newPassword) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ resetToken, newPassword })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.error };
-      }
-    } catch (error) {
-      console.error('Reset password error:', error);
-      return { success: false, message: 'Failed to reset password' };
-    }
-  };
 
   const value = {
     user,
@@ -227,9 +183,7 @@ export const AuthProvider = ({ children }) => {
     fetchProfile,
     savePerformance,
     getPerformance,
-    getStudents,
-    forgotPassword,
-    resetPassword
+    getStudents
   };
 
   return (

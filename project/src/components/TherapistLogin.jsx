@@ -92,16 +92,6 @@ const TherapistLogin = () => {
           </button>
         </form>
         <div className="therapist-login-footer">
-          <div className="therapist-login-links">
-            <button
-              onClick={() => navigate('/forgot-password/therapist')}
-              className="therapist-login-link-small"
-              type="button"
-            >
-              <HelpCircle className="w-4 h-4" />
-              Forgot Password?
-            </button>
-          </div>
           <p className="therapist-login-text">Don't have an account?</p>
           <button
             onClick={() => navigate('/register/therapist')}

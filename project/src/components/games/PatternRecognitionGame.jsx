@@ -104,18 +104,27 @@ const PatternRecognitionGame = () => {
 
   const handleNext = () => {
     if (questionNumber < TOTAL_QUESTIONS) {
+      // Get the last three emotions
+      const lastThree = emotionHistory.current.slice(-3);
+      console.log('Last 3 emotions for next question difficulty:', lastThree);
+
+      // Use the last three emotions to determine the next difficulty
       const level = getLevelFromLastThreeEmotions(emotionHistory.current);
       const pool = questions[level] || questions.medium || [];
-      
-      // Check if we need to switch pools
+      let nextUsedIndices = usedIndices;
+      let nextCurrentPool = currentPool;
+
+      // If switching pools, reset used indices
       if (pool !== currentPool) {
-        setCurrentPool([...pool]);
+        nextCurrentPool = [...pool];
+        nextUsedIndices = [];
+        setCurrentPool(nextCurrentPool);
         setUsedIndices([]);
       }
-      
-      const { question: nextQ, idx } = getRandomQuestion(pool, usedIndices);
+
+      const { question: nextQ, idx } = getRandomQuestion(pool, nextUsedIndices.concat());
       if (!nextQ) {
-        // If no more questions in this pool, try medium level
+        // If no more questions in this pool, try medium level as fallback
         const mediumPool = questions.medium || [];
         const { question: fallbackQ, idx: fallbackIdx } = getRandomQuestion(mediumPool, []);
         if (!fallbackQ) {
@@ -128,11 +137,13 @@ const PatternRecognitionGame = () => {
         setPattern(nextQ);
         setUsedIndices(prev => [...prev, idx]);
       }
-      
+
       setQuestionNumber(qn => qn + 1);
       setUserAnswer('');
       setFeedback('');
       setShowNext(false);
+      setSubmitted(false);
+      // Only clear emotion history AFTER using it for difficulty
       emotionHistory.current = [];
     } else {
       setIsFinished(true);

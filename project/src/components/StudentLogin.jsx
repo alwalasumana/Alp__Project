@@ -88,16 +88,6 @@ const StudentLogin = () => {
           </button>
         </form>
         <div className="student-login-footer">
-          <div className="student-login-links">
-            <button
-              onClick={() => navigate('/forgot-password/student')}
-              className="student-login-link-small"
-              type="button"
-            >
-              <HelpCircle className="w-4 h-4" />
-              Forgot Password?
-            </button>
-          </div>
           <p className="student-login-text">Don't have an account?</p>
           <button
             onClick={() => navigate('/register/student')}

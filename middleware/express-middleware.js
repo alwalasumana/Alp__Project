@@ -202,80 +202,6 @@ app.get('/api/auth/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Forgot password - send reset email (simplified version)
-app.post('/api/auth/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found with this email' });
-    }
-
-    // Generate a simple reset token (in production, use a more secure method)
-    const resetToken = jwt.sign(
-      { userId: user._id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // In a real application, you would send this token via email
-    // For now, we'll return it directly (for demo purposes)
-    res.json({
-      message: 'Password reset link sent to your email',
-      userId: user._id
-    });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ error: 'Failed to process forgot password request' });
-  }
-});
-
-// Reset password
-app.post('/api/auth/reset-password', async (req, res) => {
-  try {
-    const { resetToken, newPassword } = req.body;
-
-    if (!resetToken || !newPassword) {
-      return res.status(400).json({ error: 'Reset token and new password are required' });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
-    }
-
-    // Verify the reset token
-    const decoded = jwt.verify(resetToken, JWT_SECRET);
-    
-    // Find user
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    
-    // Update password
-    user.password = hashedPassword;
-    await user.save();
-
-    res.json({ message: 'Password reset successfully' });
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(400).json({ error: 'Invalid or expired reset token' });
-    }
-    console.error('Reset password error:', error);
-    res.status(500).json({ error: 'Failed to reset password' });
-  }
-});
-
 // Performance tracking endpoints
 app.post('/api/performance', authenticateToken, async (req, res) => {
   try {
@@ -602,6 +528,37 @@ app.get('/api/questions/:type', async (req, res) => {
   } catch (error) {
     console.error('Error fetching questions:', error);
     res.status(500).json({ error: 'Failed to fetch questions' });
+  }
+});
+
+// Therapist/Admin resets a student's password
+app.post('/api/admin/reset-password', async (req, res) => {
+  try {
+    const { studentId, newPassword } = req.body;
+
+    if (!studentId || !newPassword) {
+      return res.status(400).json({ error: 'Student ID and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Find the student
+    const student = await User.findById(studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    student.password = await bcrypt.hash(newPassword, salt);
+    await student.save();
+
+    res.json({ message: 'Password reset successfully for student.' });
+  } catch (error) {
+    console.error('Admin password reset error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 

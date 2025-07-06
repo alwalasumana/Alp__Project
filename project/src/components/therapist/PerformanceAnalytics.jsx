@@ -84,8 +84,14 @@ const PerformanceAnalytics = () => {
   const memorySessions = filteredSessions.filter(session => session.gameType === 'memory' || session.gameId === 'memory-match');
   const nonMemorySessions = filteredSessions.filter(session => !(session.gameType === 'memory' || session.gameId === 'memory-match'));
 
-  const averageScore = totalSessions > 0 
-    ? Math.round(nonMemorySessions.reduce((sum, session) => sum + session.score, 0) / (nonMemorySessions.length || 1))
+  const averageScore = totalSessions > 0
+    ? Math.round(
+        nonMemorySessions.length > 0
+          ? nonMemorySessions.reduce((sum, session) => sum + session.score, 0) / nonMemorySessions.length
+          : memorySessions.length > 0
+            ? memorySessions.reduce((sum, session) => sum + (session.moves || session.score), 0) / memorySessions.length
+            : 0
+      )
     : 0;
   const averageMoves = memorySessions.length > 0
     ? Math.round(memorySessions.reduce((sum, session) => sum + (session.moves || session.score), 0) / memorySessions.length)
@@ -135,13 +141,24 @@ const PerformanceAnalytics = () => {
   // Calculate averages for game performance
   Object.keys(gamePerformance).forEach(gameName => {
     const data = gamePerformance[gameName];
-    if (data.isMemory) {
-      data.averageMoves = Math.round(data.totalMoves / data.sessions);
+    // Always calculate averageScore, even for memory games (use moves if no score)
+    if (data.sessions > 0) {
+      data.averageScore = Math.round(
+        data.isMemory && data.totalScore === 0
+          ? data.totalMoves / data.sessions // fallback to moves if no score
+          : data.totalScore / data.sessions
+      );
+      if (data.isMemory) {
+        data.averageMoves = Math.round(data.totalMoves / data.sessions);
+      }
+      data.averageAccuracy = Math.round(data.totalAccuracy / data.sessions);
+      data.averageTime = Math.round(data.totalTime / data.sessions / 60);
     } else {
-      data.averageScore = Math.round(data.totalScore / data.sessions);
+      data.averageScore = 0;
+      data.averageMoves = 0;
+      data.averageAccuracy = 0;
+      data.averageTime = 0;
     }
-    data.averageAccuracy = Math.round(data.totalAccuracy / data.sessions);
-    data.averageTime = Math.round(data.totalTime / data.sessions / 60);
   });
 
   const getEmotionalStateEmoji = (state) => {
@@ -300,7 +317,12 @@ const PerformanceAnalytics = () => {
                       <div className="performance-analytics-game-stat-value">{data.sessions}</div>
                       <div className="performance-analytics-game-stat-label">Sessions</div>
                     </div>
-                    {data.isMemory ? (
+                    {gameName === 'Activities:' ? (
+                      <div className="performance-analytics-game-stat">
+                        <div className="performance-analytics-game-stat-value">{data.averageScore}%</div>
+                        <div className="performance-analytics-game-stat-label">Avg Score</div>
+                      </div>
+                    ) : data.isMemory ? (
                       <div className="performance-analytics-game-stat">
                         <div className="performance-analytics-game-stat-value">{data.averageMoves} moves</div>
                         <div className="performance-analytics-game-stat-label">Avg Moves</div>
